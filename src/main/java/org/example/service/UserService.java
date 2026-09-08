@@ -17,33 +17,48 @@ public class UserService {
         users.add(new User("admin@campus.local", "admin123", "Responsable campus", UserRole.RESPONSABLE));
     }
 
-    public User authenticate(String email, String password) {
+    public synchronized User authenticate(String email, String password) {
+        if (email == null || password == null) {
+            return null;
+        }
+        String normalizedEmail = normalizeEmail(email);
         return users.stream()
-                .filter(user -> user.getEmail().equalsIgnoreCase(email)
+                .filter(user -> user.getEmail().equals(normalizedEmail)
                         && user.getPassword().equals(password))
                 .findFirst()
                 .orElse(null);
     }
 
-    public boolean isPending(String email) {
-        return pendingStudents.stream().anyMatch(user -> user.getEmail().equalsIgnoreCase(email));
+    public synchronized boolean isPending(String email) {
+        if (email == null) {
+            return false;
+        }
+        return pendingStudents.stream().anyMatch(user -> user.getEmail().equals(normalizeEmail(email)));
     }
 
-    public boolean exists(String email) {
-        return users.stream().anyMatch(user -> user.getEmail().equalsIgnoreCase(email))
+    public synchronized boolean exists(String email) {
+        if (email == null) {
+            return false;
+        }
+        String normalizedEmail = normalizeEmail(email);
+        return users.stream().anyMatch(user -> user.getEmail().equals(normalizedEmail))
                 || isPending(email);
     }
 
-    public void requestStudentRegistration(String email, String password, String displayName) {
-        User user = new User(email.trim().toLowerCase(), password, displayName.trim(), UserRole.ETUDIANT);
+    public synchronized void requestStudentRegistration(String email, String password, String displayName) {
+        validateRegistration(email, password, displayName);
+        if (exists(email)) {
+            throw new IllegalArgumentException("Cette adresse email est déjà utilisée.");
+        }
+        User user = new User(normalizeEmail(email), password, displayName.trim(), UserRole.ETUDIANT);
         pendingStudents.add(user);
     }
 
-    public List<User> findPendingStudents() {
+    public synchronized List<User> findPendingStudents() {
         return List.copyOf(pendingStudents);
     }
 
-    public void approveStudent(String email) {
+    public synchronized void approveStudent(String email) {
         User pending = findPending(email);
         if (pending != null) {
             pendingStudents.remove(pending);
@@ -51,7 +66,7 @@ public class UserService {
         }
     }
 
-    public void rejectStudent(String email) {
+    public synchronized void rejectStudent(String email) {
         User pending = findPending(email);
         if (pending != null) {
             pendingStudents.remove(pending);
@@ -59,9 +74,28 @@ public class UserService {
     }
 
     private User findPending(String email) {
+        if (email == null) {
+            return null;
+        }
         return pendingStudents.stream()
-                .filter(user -> user.getEmail().equalsIgnoreCase(email))
+                .filter(user -> user.getEmail().equals(normalizeEmail(email)))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void validateRegistration(String email, String password, String displayName) {
+        if (email == null || !email.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalArgumentException("L'adresse email est invalide.");
+        }
+        if (password == null || password.length() < 8) {
+            throw new IllegalArgumentException("Le mot de passe doit contenir au moins 8 caractères.");
+        }
+        if (displayName == null || displayName.trim().length() < 2) {
+            throw new IllegalArgumentException("Le nom complet est obligatoire.");
+        }
+    }
+
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase(java.util.Locale.ROOT);
     }
 }

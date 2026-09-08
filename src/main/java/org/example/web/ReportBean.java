@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import org.example.model.Report;
 import org.example.model.ReportCategory;
 import org.example.model.ReportStatus;
+import org.example.model.UserRole;
 import org.example.service.ReportService;
 
 import java.io.IOException;
@@ -56,11 +57,25 @@ public class ReportBean {
     }
 
     public void createReport() throws IOException {
-        reportService.addReport(title, description, location, reporter, category);
+        if (authBean.getCurrentUser() == null || authBean.getCurrentUser().getRole() != UserRole.ETUDIANT) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Action refusée", "Seul un étudiant connecté peut créer un signalement."));
+            return;
+        }
+        reporter = authBean.getCurrentUser().getEmail();
+        try {
+            reportService.addReport(title, description, location, reporter, category);
+        } catch (IllegalArgumentException exception) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Signalement impossible", exception.getMessage()));
+            return;
+        }
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO, "Signalement cree",
                         "Le signalement a bien ete enregistre."));
-        FacesContext.getCurrentInstance().getExternalContext().redirect("index.xhtml");
+        FacesContext.getCurrentInstance().getExternalContext().redirect("student.xhtml");
     }
 
     public String getTitle() { return title; }
@@ -95,6 +110,12 @@ public class ReportBean {
     }
 
     public void updateStatus(long id, ReportStatus status) {
+        if (authBean.getCurrentUser() == null || authBean.getCurrentUser().getRole() != UserRole.RESPONSABLE) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Action refusée", "Seul un responsable peut modifier un statut."));
+            return;
+        }
         reportService.updateStatus(id, status);
     }
 }

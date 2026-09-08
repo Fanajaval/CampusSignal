@@ -18,13 +18,14 @@ public class RegisterBean {
     private String displayName;
 
     public void register() {
-        if (userService.exists(email)) {
+        try {
+            userService.requestStudentRegistration(email, password, displayName);
+        } catch (IllegalArgumentException exception) {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            "Inscription impossible", "Cette adresse email est déjà utilisée."));
+                            "Inscription impossible", exception.getMessage()));
             return;
         }
-        userService.requestStudentRegistration(email, password, displayName);
         FacesContext.getCurrentInstance().addMessage(null,
             new FacesMessage(FacesMessage.SEVERITY_INFO,
                 "Demande envoyée", "Votre inscription est en attente de validation par un responsable."));
