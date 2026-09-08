@@ -63,8 +63,57 @@
         }, 300);
     }
 
+    // Group validation errors into one message
+    function groupValidationErrors(messages) {
+        const errors = [];
+        const warnings = [];
+        const infos = [];
+        const successes = [];
+        
+        messages.forEach(msg => {
+            const severity = msg.severity || 'info';
+            const text = msg.summary || msg.text;
+            
+            if (severity === 'error') {
+                // Check if it's a validation error (required field)
+                if (text.includes('obligatoire') || text.includes('required')) {
+                    errors.push(text);
+                } else {
+                    // Non-validation error, keep separate
+                    showToast(text, severity, msg.detail);
+                }
+            } else if (severity === 'warning') {
+                warnings.push({ summary: text, detail: msg.detail });
+            } else if (severity === 'success') {
+                successes.push({ summary: text, detail: msg.detail });
+            } else {
+                infos.push({ summary: text, detail: msg.detail });
+            }
+        });
+        
+        // Show grouped validation errors
+        if (errors.length > 0) {
+            if (errors.length === 1) {
+                showToast(errors[0], 'error', null);
+            } else {
+                showToast(
+                    'Veuillez remplir tous les champs obligatoires',
+                    'error',
+                    errors.length + ' champ(s) requis'
+                );
+            }
+        }
+        
+        // Show other message types
+        warnings.forEach(w => showToast(w.summary, 'warning', w.detail));
+        infos.forEach(i => showToast(i.summary, 'info', i.detail));
+        successes.forEach(s => showToast(s.summary, 'success', s.detail));
+    }
+
     // Convert JSF messages to toasts
     function convertJSFMessages() {
+        const allMessages = [];
+        
         // Find all JSF message elements
         const messageContainers = document.querySelectorAll('.messages, [class*="message"]');
         
@@ -102,7 +151,7 @@
                 }
                 
                 if (summary) {
-                    showToast(summary, severity, detail);
+                    allMessages.push({ severity, summary, detail });
                 }
             });
             
@@ -111,6 +160,11 @@
                 container.style.display = 'none';
             }
         });
+        
+        // Group and show messages
+        if (allMessages.length > 0) {
+            groupValidationErrors(allMessages);
+        }
     }
 
     // Global function to show toast from outside
