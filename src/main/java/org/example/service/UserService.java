@@ -3,6 +3,7 @@ package org.example.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.example.model.User;
 import org.example.model.UserRole;
+import org.example.model.StudyLevel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,12 +46,15 @@ public class UserService {
                 || isPending(email);
     }
 
-    public synchronized void requestStudentRegistration(String email, String password, String displayName) {
-        validateRegistration(email, password, displayName);
+    public synchronized void requestStudentRegistration(String email, String password, String displayName,
+                                                        String institution, String studentNumber,
+                                                        StudyLevel studyLevel) {
+        validateRegistration(email, password, displayName, institution, studentNumber, studyLevel);
         if (exists(email)) {
             throw new IllegalArgumentException("Cette adresse email est déjà utilisée.");
         }
-        User user = new User(normalizeEmail(email), password, displayName.trim(), UserRole.ETUDIANT);
+        User user = new User(normalizeEmail(email), password, displayName.trim(), institution.trim(),
+            studentNumber.trim(), studyLevel, UserRole.ETUDIANT);
         pendingStudents.add(user);
     }
 
@@ -83,7 +87,8 @@ public class UserService {
                 .orElse(null);
     }
 
-    private void validateRegistration(String email, String password, String displayName) {
+    private void validateRegistration(String email, String password, String displayName,
+                                      String institution, String studentNumber, StudyLevel studyLevel) {
         if (email == null || !email.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
             throw new IllegalArgumentException("L'adresse email est invalide.");
         }
@@ -92,6 +97,15 @@ public class UserService {
         }
         if (displayName == null || displayName.trim().length() < 2) {
             throw new IllegalArgumentException("Le nom complet est obligatoire.");
+        }
+        if (institution == null || institution.trim().length() < 2) {
+            throw new IllegalArgumentException("L'école ou la faculté est obligatoire.");
+        }
+        if (studentNumber == null || !studentNumber.trim().matches("^[A-Za-z0-9][A-Za-z0-9./-]{2,29}$")) {
+            throw new IllegalArgumentException("Le matricule est invalide.");
+        }
+        if (studyLevel == null) {
+            throw new IllegalArgumentException("Le niveau d'étude est obligatoire.");
         }
     }
 

@@ -1,6 +1,53 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:ui="jakarta.faces.facelets">
-<h:head><title>CampusSignal - Demandes d'inscription</title><h:outputStylesheet library="css" name="app.css"/></h:head>
-<h:body><header class="topbar"><div><span class="eyebrow">Espace responsable</span><h1>Demandes d'inscription</h1></div><div class="nav-actions"><h:link value="Tableau de bord" outcome="admin" styleClass="button button-quiet"/><h:link value="Demandes d'inscription" outcome="admin-users" styleClass="button button-nav-active"/><h:link value="Signalements" outcome="admin-reports" styleClass="button button-quiet"/><h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-quiet"/></h:form></div></header>
-<main class="page-shell"><section class="intro"><p class="eyebrow">Accès utilisateurs</p><h2>Valider les nouveaux étudiants.</h2><p class="muted">Chaque demande doit être examinée avant la création du compte.</p></section><h:form><h:messages styleClass="messages"/><section class="content-section"><div class="section-heading"><div><p class="eyebrow">À examiner</p><h2>Demandes en attente</h2></div><span class="muted">#{userAdminBean.pendingStudents.size()} demande(s)</span></div><div class="pending-list"><ui:repeat value="#{userAdminBean.pendingStudents}" var="pending"><article class="pending-row"><div><h3>#{pending.displayName}</h3><p>#{pending.email}</p></div><div class="pending-actions"><h:commandButton value="Valider le compte" action="#{userAdminBean.approve(pending.email)}" styleClass="button button-approve"/><h:commandButton value="Refuser" action="#{userAdminBean.reject(pending.email)}" styleClass="button button-reject"/></div></article></ui:repeat></div></section></h:form></main>
-</h:body></html>
+<h:head>
+    <title>CampusSignal - Demandes d'inscription</title>
+    <h:outputStylesheet library="css" name="app.css"/>
+</h:head>
+<h:body>
+    <header class="topbar">
+        <div><span class="eyebrow">Espace responsable</span><h1>Demandes d'inscription</h1></div>
+        <div class="nav-actions">
+            <h:link value="Tableau de bord" outcome="admin" styleClass="button button-quiet"/>
+            <h:link value="Demandes d'inscription" outcome="admin-users" styleClass="button button-nav-active"/>
+            <h:link value="Signalements" outcome="admin-reports" styleClass="button button-quiet"/>
+            <h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-quiet"/></h:form>
+        </div>
+    </header>
+    <main class="page-shell">
+        <section class="intro">
+            <p class="eyebrow">Université de Fianarantsoa</p>
+            <h2>Valider les nouveaux étudiants.</h2>
+            <p class="muted">Vérifiez l'école ou la faculté, le matricule et le niveau avant de créer le compte.</p>
+        </section>
+        <h:form>
+            <h:messages styleClass="messages"/>
+            <section class="content-section">
+                <div class="section-heading">
+                    <div><p class="eyebrow">À examiner</p><h2>Demandes en attente</h2></div>
+                    <span class="muted">#{userAdminBean.pendingStudents.size()} demande(s)</span>
+                </div>
+                <div class="pending-list">
+                    <ui:repeat value="#{userAdminBean.pendingStudents}" var="pending">
+                        <article class="pending-row">
+                            <div>
+                                <h3>#{pending.displayName}</h3>
+                                <p>#{pending.email}</p>
+                                <div class="pending-details">
+                                    <span>École / Faculté : #{pending.institution}</span>
+                                    <span>Matricule : #{pending.studentNumber}</span>
+                                    <span>Niveau : #{pending.studyLevel.label}</span>
+                                </div>
+                            </div>
+                            <div class="pending-actions">
+                                <h:commandButton value="Valider le compte" action="#{userAdminBean.approve(pending.email)}" styleClass="button button-approve"/>
+                                <h:commandButton value="Refuser" action="#{userAdminBean.reject(pending.email)}" styleClass="button button-reject"/>
+                            </div>
+                        </article>
+                    </ui:repeat>
+                </div>
+            </section>
+        </h:form>
+    </main>
+</h:body>
+</html>

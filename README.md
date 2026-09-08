@@ -1,12 +1,15 @@
 # CampusSignal
 
-Application web Jakarta EE 10 pour le signalement et le suivi des problèmes sur un campus.
+Application web Jakarta EE 10 pour le signalement et le suivi des problèmes du campus de l'Université de Fianarantsoa.
+
+Le périmètre initial est volontairement limité à l'Université de Fianarantsoa. Le champ étudiant correspond à son école ou sa faculté, par exemple `Faculté des Sciences` ou `Faculté de Droit et de Sciences Politiques`.
 
 ## Parcours
 
 - Étudiant : création et suivi de ses signalements.
 - Responsable : tableau de bord, validation des comptes étudiants et gestion des signalements.
 - Inscription étudiant : demande en attente jusqu'à validation par un responsable.
+- Profil étudiant : nom, email, école/faculté et matricule.
 - Statuts d'un signalement : `Signalé`, `Reçu`, `Résolu`.
 
 ## Lancer le projet

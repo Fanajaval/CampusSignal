@@ -1,6 +1,7 @@
 package org.example.service;
 
 import org.example.model.User;
+import org.example.model.StudyLevel;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,10 +15,14 @@ class UserServiceTest {
     void newStudentMustBeApprovedBeforeLogin() {
         UserService service = new UserService();
 
-        service.requestStudentRegistration("new.student@campus.local", "password123", "New Student");
+        service.requestStudentRegistration("new.student@campus.local", "password123", "New Student",
+                "Faculté des Sciences", "2024-EST-015", StudyLevel.L1);
 
         assertTrue(service.isPending("NEW.STUDENT@CAMPUS.LOCAL"));
         assertNull(service.authenticate("new.student@campus.local", "password123"));
+        assertEquals("Faculté des Sciences", service.findPendingStudents().get(0).getInstitution());
+        assertEquals("2024-EST-015", service.findPendingStudents().get(0).getStudentNumber());
+        assertEquals(StudyLevel.L1, service.findPendingStudents().get(0).getStudyLevel());
 
         service.approveStudent("new.student@campus.local");
 
@@ -30,10 +35,13 @@ class UserServiceTest {
         UserService service = new UserService();
 
         assertThrows(IllegalArgumentException.class,
-                () -> service.requestStudentRegistration("invalid", "password123", "Student"));
+                () -> service.requestStudentRegistration("invalid", "password123", "Student",
+                    "Université", "2024-EST-016", StudyLevel.L1));
         assertThrows(IllegalArgumentException.class,
-                () -> service.requestStudentRegistration("student@campus.local", "password123", "Student"));
+                () -> service.requestStudentRegistration("student@campus.local", "password123", "Student",
+                    "Université", "2024-EST-017", StudyLevel.L2));
         assertThrows(IllegalArgumentException.class,
-                () -> service.requestStudentRegistration("new@campus.local", "short", "Student"));
+                () -> service.requestStudentRegistration("new@campus.local", "short", "Student",
+                    "Université", "2024-EST-018", StudyLevel.L3));
     }
 }

@@ -6,6 +6,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.example.model.User;
+import org.example.model.StudyLevel;
 import org.example.service.UserService;
 
 @Named("registerBean")
@@ -16,10 +17,13 @@ public class RegisterBean {
     private String email;
     private String password;
     private String displayName;
+    private String institution;
+    private String studentNumber;
+    private StudyLevel studyLevel;
 
     public void register() {
         try {
-            userService.requestStudentRegistration(email, password, displayName);
+            userService.requestStudentRegistration(email, password, displayName, institution, studentNumber, studyLevel);
         } catch (IllegalArgumentException exception) {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
@@ -32,6 +36,9 @@ public class RegisterBean {
         email = null;
         password = null;
         displayName = null;
+        institution = null;
+        studentNumber = null;
+        studyLevel = null;
     }
 
     public String getEmail() { return email; }
@@ -40,4 +47,11 @@ public class RegisterBean {
     public void setPassword(String password) { this.password = password; }
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
+    public String getInstitution() { return institution; }
+    public void setInstitution(String institution) { this.institution = institution; }
+    public String getStudentNumber() { return studentNumber; }
+    public void setStudentNumber(String studentNumber) { this.studentNumber = studentNumber; }
+    public StudyLevel[] getStudyLevels() { return StudyLevel.values(); }
+    public StudyLevel getStudyLevel() { return studyLevel; }
+    public void setStudyLevel(StudyLevel studyLevel) { this.studyLevel = studyLevel; }
 }
