@@ -65,100 +65,88 @@
 
     // Group validation errors into one message
     function groupValidationErrors(messages) {
-        const errors = [];
-        const warnings = [];
-        const infos = [];
-        const successes = [];
+        const validationErrors = [];
+        const otherMessages = [];
         
         messages.forEach(msg => {
-            const severity = msg.severity || 'info';
-            const text = msg.summary || msg.text;
+            const text = msg.summary || msg.text || '';
             
-            if (severity === 'error') {
-                // Check if it's a validation error (required field)
-                if (text.includes('obligatoire') || text.includes('required')) {
-                    errors.push(text);
-                } else {
-                    // Non-validation error, keep separate
-                    showToast(text, severity, msg.detail);
-                }
-            } else if (severity === 'warning') {
-                warnings.push({ summary: text, detail: msg.detail });
-            } else if (severity === 'success') {
-                successes.push({ summary: text, detail: msg.detail });
+            // Check if it's a validation error
+            if (text.includes('obligatoire') || text.includes('required') || text.includes('requis')) {
+                validationErrors.push(text);
             } else {
-                infos.push({ summary: text, detail: msg.detail });
+                otherMessages.push(msg);
             }
         });
         
-        // Show grouped validation errors
-        if (errors.length > 0) {
-            if (errors.length === 1) {
-                showToast(errors[0], 'error', null);
+        // Show grouped validation errors as ONE toast
+        if (validationErrors.length > 0) {
+            if (validationErrors.length === 1) {
+                showToast(validationErrors[0], 'error', null);
             } else {
                 showToast(
                     'Veuillez remplir tous les champs obligatoires',
                     'error',
-                    errors.length + ' champ(s) requis'
+                    validationErrors.length + ' champ(s) requis'
                 );
             }
         }
         
-        // Show other message types
-        warnings.forEach(w => showToast(w.summary, 'warning', w.detail));
-        infos.forEach(i => showToast(i.summary, 'info', i.detail));
-        successes.forEach(s => showToast(s.summary, 'success', s.detail));
+        // Show other messages separately
+        otherMessages.forEach(msg => {
+            showToast(msg.summary || msg.text, msg.severity, msg.detail);
+        });
     }
 
     // Convert JSF messages to toasts
     function convertJSFMessages() {
         const allMessages = [];
         
-        // Find all JSF message elements
-        const messageContainers = document.querySelectorAll('.messages, [class*="message"]');
+        // Find all message containers
+        const messageContainers = document.querySelectorAll('.messages, ul.messages, div.messages');
         
         messageContainers.forEach(container => {
-            const messages = container.querySelectorAll('li, .message-item, [role="alert"]');
+            // Try to find list items
+            let messages = container.querySelectorAll('li');
+            
+            // If no list items, try other formats
+            if (messages.length === 0) {
+                messages = container.querySelectorAll('.ui-messages-error, .ui-messages-info, .ui-messages-warn');
+            }
             
             messages.forEach(msg => {
                 let severity = 'info';
-                let summary = '';
-                let detail = '';
+                let text = msg.textContent.trim();
                 
-                // Detect severity from classes
-                if (msg.className.includes('error') || container.className.includes('error')) {
+                // Remove the × character if present
+                text = text.replace(/×/g, '').trim();
+                
+                // Skip empty messages
+                if (!text || text.length === 0) return;
+                
+                // Detect severity
+                if (msg.classList.contains('ui-messages-error') || 
+                    msg.classList.contains('error') ||
+                    container.classList.contains('error')) {
                     severity = 'error';
-                } else if (msg.className.includes('warn')) {
+                } else if (msg.classList.contains('ui-messages-warn') || msg.classList.contains('warn')) {
                     severity = 'warning';
-                } else if (msg.className.includes('info')) {
+                } else if (msg.classList.contains('ui-messages-info') || msg.classList.contains('info')) {
                     severity = 'info';
-                } else if (msg.className.includes('success')) {
+                } else if (msg.classList.contains('ui-messages-success') || msg.classList.contains('success')) {
                     severity = 'success';
                 }
                 
-                // Extract message text
-                const summaryEl = msg.querySelector('strong, .summary');
-                const detailEl = msg.querySelector('small, .detail');
-                
-                if (summaryEl) {
-                    summary = summaryEl.textContent.trim();
-                    if (detailEl) {
-                        detail = detailEl.textContent.trim();
-                    }
-                } else {
-                    // Full text as summary
-                    summary = msg.textContent.trim();
-                }
-                
-                if (summary) {
-                    allMessages.push({ severity, summary, detail });
-                }
+                allMessages.push({
+                    text: text,
+                    summary: text,
+                    severity: severity,
+                    detail: null
+                });
             });
             
-            // Hide original message container
-            if (container) {
-                container.style.display = 'none';
-            }
+            // Hide the original container
+            container.style.display = 'none';
         });
         
         // Group and show messages
@@ -167,21 +155,24 @@
         }
     }
 
-    // Global function to show toast from outside
+    // Global function
     window.showToast = showToast;
 
-    // Auto-convert messages on page load and after AJAX
+    // Run on page load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', convertJSFMessages);
     } else {
         convertJSFMessages();
     }
+    
+    // Also run after a short delay to catch late-rendered messages
+    setTimeout(convertJSFMessages, 100);
 
     // Listen for JSF AJAX events
-    if (window.jsf && jsf.ajax) {
+    if (typeof jsf !== 'undefined' && jsf.ajax) {
         jsf.ajax.addOnEvent(function(data) {
             if (data.status === 'success') {
-                setTimeout(convertJSFMessages, 100);
+                setTimeout(convertJSFMessages, 150);
             }
         });
     }

@@ -72,10 +72,16 @@ public class ReportBean {
                             "Signalement impossible", exception.getMessage()));
             return;
         }
+        
+        // Clear form fields
+        title = null;
+        description = null;
+        location = null;
+        category = null;
+        
         FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO, "Signalement cree",
-                        "Le signalement a bien ete enregistre."));
-        FacesContext.getCurrentInstance().getExternalContext().redirect("my-reports.xhtml");
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Signalement créé",
+                        "Le signalement a bien été enregistré."));
     }
 
     public String getTitle() { return title; }
