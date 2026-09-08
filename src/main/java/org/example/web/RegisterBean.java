@@ -8,30 +8,29 @@ import jakarta.inject.Named;
 import org.example.model.User;
 import org.example.service.UserService;
 
-import java.io.IOException;
-
 @Named("registerBean")
 @RequestScoped
 public class RegisterBean {
     @Inject
     private UserService userService;
-    @Inject
-    private AuthBean authBean;
-
     private String email;
     private String password;
     private String displayName;
 
-    public void register() throws IOException {
+    public void register() {
         if (userService.exists(email)) {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
                             "Inscription impossible", "Cette adresse email est déjà utilisée."));
             return;
         }
-        User user = userService.registerStudent(email, password, displayName);
-        authBean.login(user);
-        FacesContext.getCurrentInstance().getExternalContext().redirect("student.xhtml");
+        userService.requestStudentRegistration(email, password, displayName);
+        FacesContext.getCurrentInstance().addMessage(null,
+            new FacesMessage(FacesMessage.SEVERITY_INFO,
+                "Demande envoyée", "Votre inscription est en attente de validation par un responsable."));
+        email = null;
+        password = null;
+        displayName = null;
     }
 
     public String getEmail() { return email; }

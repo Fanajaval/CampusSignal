@@ -24,9 +24,12 @@ public class LoginBean {
     public void login() throws IOException {
         User user = userService.authenticate(email, password);
         if (user == null) {
+            String detail = userService.isPending(email)
+                ? "Votre compte attend encore la validation d'un responsable."
+                : "Email ou mot de passe incorrect.";
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            "Connexion refusée", "Email ou mot de passe incorrect."));
+                    "Connexion refusée", detail));
             return;
         }
         authBean.login(user);

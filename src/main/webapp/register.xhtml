@@ -5,7 +5,7 @@
     <main class="auth-shell">
         <section class="auth-brand"><div class="brand-mark">CS</div><p class="eyebrow">CampusSignal</p><h1>Votre voix améliore le quotidien.</h1><p>Créez votre compte étudiant et gardez la main sur chaque signalement.</p><div class="auth-points"><span><b>01</b> Un espace personnel</span><span><b>02</b> Des statuts transparents</span><span><b>03</b> Un campus plus réactif</span></div></section>
         <section class="auth-panel"><div class="auth-heading"><p class="eyebrow">Nouveau compte</p><h2>Rejoindre CampusSignal.</h2><p class="muted">Quelques informations suffisent pour commencer.</p></div>
-            <h:form styleClass="report-form"><h:messages styleClass="messages"/>
+            <h:form styleClass="report-form"><h:messages styleClass="messages" globalOnly="true"/>
                 <div class="field"><h:outputLabel for="displayName" value="Nom complet"/><h:inputText id="displayName" value="#{registerBean.displayName}" required="true" requiredMessage="Le nom est obligatoire." autocomplete="name"/></div>
                 <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{registerBean.email}" required="true" requiredMessage="L'email est obligatoire." autocomplete="email"/></div>
                 <div class="field"><h:outputLabel for="password" value="Mot de passe"/><h:inputSecret id="password" value="#{registerBean.password}" required="true" requiredMessage="Le mot de passe est obligatoire." autocomplete="new-password"/></div>
