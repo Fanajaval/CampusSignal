@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core" xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title>CampusSignal - Tableau de bord</title>
+    <h:outputStylesheet library="css" name="app.css"/>
+</h:head>
+<h:body>
+    <header class="topbar">
+        <div><span class="eyebrow">CampusSignal</span><h1>Choisir votre espace</h1></div>
+        <h:link value="Se connecter" outcome="login" styleClass="button button-primary"/>
+    </header>
+    <main class="page-shell">
+        <section class="intro">
+            <p class="eyebrow">Vue d'ensemble</p>
+            <h2>Un campus plus simple à maintenir.</h2>
+            <p class="muted">Accédez à l’espace adapté à votre rôle.</p>
+        </section>
+        <section class="role-grid">
+            <article class="role-card">
+                <span class="role-icon">ET</span><p class="eyebrow">Espace étudiant</p>
+                <h2>Signaler et suivre</h2><p class="muted">Créez un signalement, consultez vos demandes et suivez leur statut.</p>
+                <h:link value="Accéder à mon espace" outcome="student" styleClass="button button-primary"/>
+            </article>
+            <article class="role-card role-card-dark">
+                <span class="role-icon">AD</span><p class="eyebrow">Espace responsable</p>
+                <h2>Gérer les problèmes</h2><p>Recherchez les signalements, consultez les détails et pilotez leur résolution.</p>
+                <h:link value="Accéder à la gestion" outcome="admin" styleClass="button button-quiet"/>
+            </article>
+        </section>
+    </main>
+</h:body>
+</html>

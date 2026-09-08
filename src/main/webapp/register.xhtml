@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html">
+<h:head><title>CampusSignal - Inscription</title><h:outputStylesheet library="css" name="app.css"/></h:head>
+<h:body>
+    <main class="auth-shell"><section class="auth-panel"><p class="eyebrow">Nouveau compte</p><h1>Créer votre compte étudiant.</h1><p class="muted">Inscrivez-vous pour suivre vos signalements depuis votre espace personnel.</p>
+        <h:form styleClass="report-form"><h:messages styleClass="messages"/>
+            <div class="field"><h:outputLabel for="displayName" value="Nom complet"/><h:inputText id="displayName" value="#{registerBean.displayName}" required="true" requiredMessage="Le nom est obligatoire."/></div>
+            <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{registerBean.email}" required="true" requiredMessage="L'email est obligatoire."/></div>
+            <div class="field"><h:outputLabel for="password" value="Mot de passe"/><h:inputSecret id="password" value="#{registerBean.password}" required="true" requiredMessage="Le mot de passe est obligatoire."/></div>
+            <h:commandButton value="Créer mon compte" action="#{registerBean.register}" styleClass="button button-primary form-submit"/>
+        </h:form><p class="auth-link">Vous avez déjà un compte ? <h:link value="Se connecter" outcome="login"/></p>
+    </section></main>
+</h:body>
+</html>
