@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html">
 <h:head><title>CampusSignal - Inscription</title><h:outputStylesheet library="css" name="app.css"/></h:head>
 <h:body>
-    <main class="auth-shell"><section class="auth-panel"><p class="eyebrow">Nouveau compte</p><h1>Créer votre compte étudiant.</h1><p class="muted">Inscrivez-vous pour suivre vos signalements depuis votre espace personnel.</p>
-        <h:form styleClass="report-form"><h:messages styleClass="messages"/>
-            <div class="field"><h:outputLabel for="displayName" value="Nom complet"/><h:inputText id="displayName" value="#{registerBean.displayName}" required="true" requiredMessage="Le nom est obligatoire."/></div>
-            <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{registerBean.email}" required="true" requiredMessage="L'email est obligatoire."/></div>
-            <div class="field"><h:outputLabel for="password" value="Mot de passe"/><h:inputSecret id="password" value="#{registerBean.password}" required="true" requiredMessage="Le mot de passe est obligatoire."/></div>
-            <h:commandButton value="Créer mon compte" action="#{registerBean.register}" styleClass="button button-primary form-submit"/>
-        </h:form><p class="auth-link">Vous avez déjà un compte ? <h:link value="Se connecter" outcome="login"/></p>
-    </section></main>
+    <main class="auth-shell">
+        <section class="auth-brand"><div class="brand-mark">CS</div><p class="eyebrow">CampusSignal</p><h1>Votre voix améliore le quotidien.</h1><p>Créez votre compte étudiant et gardez la main sur chaque signalement.</p><div class="auth-points"><span><b>01</b> Un espace personnel</span><span><b>02</b> Des statuts transparents</span><span><b>03</b> Un campus plus réactif</span></div></section>
+        <section class="auth-panel"><div class="auth-heading"><p class="eyebrow">Nouveau compte</p><h2>Rejoindre CampusSignal.</h2><p class="muted">Quelques informations suffisent pour commencer.</p></div>
+            <h:form styleClass="report-form"><h:messages styleClass="messages"/>
+                <div class="field"><h:outputLabel for="displayName" value="Nom complet"/><h:inputText id="displayName" value="#{registerBean.displayName}" required="true" requiredMessage="Le nom est obligatoire." autocomplete="name"/></div>
+                <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{registerBean.email}" required="true" requiredMessage="L'email est obligatoire." autocomplete="email"/></div>
+                <div class="field"><h:outputLabel for="password" value="Mot de passe"/><h:inputSecret id="password" value="#{registerBean.password}" required="true" requiredMessage="Le mot de passe est obligatoire." autocomplete="new-password"/></div>
+                <h:commandButton value="Créer mon compte" action="#{registerBean.register}" styleClass="button button-primary form-submit"/>
+            </h:form><p class="auth-link">Vous avez déjà un compte ? <h:link value="Se connecter" outcome="login"/></p>
+        </section>
+    </main>
 </h:body>
 </html>

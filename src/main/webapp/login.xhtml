@@ -2,16 +2,25 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html">
 <h:head><title>CampusSignal - Connexion</title><h:outputStylesheet library="css" name="app.css"/></h:head>
 <h:body>
-    <main class="auth-shell"><section class="auth-panel">
-        <p class="eyebrow">CampusSignal</p><h1>Bienvenue sur votre campus.</h1>
-        <p class="muted">Connectez-vous pour signaler un problème ou suivre sa résolution.</p>
-        <h:form styleClass="report-form"><h:messages styleClass="messages"/>
-            <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{loginBean.email}" required="true" requiredMessage="L'email est obligatoire."/></div>
-            <div class="field"><h:outputLabel for="password" value="Mot de passe"/><h:inputSecret id="password" value="#{loginBean.password}" required="true" requiredMessage="Le mot de passe est obligatoire."/></div>
-            <h:commandButton value="Se connecter" action="#{loginBean.login}" styleClass="button button-primary form-submit"/>
-        </h:form>
-        <p class="auth-link">Pas encore de compte ? <h:link value="Créer un compte étudiant" outcome="register"/></p>
-        <div class="demo-access"><strong>Comptes de démonstration</strong><span>Étudiant : student@campus.local / student123</span><span>Responsable : admin@campus.local / admin123</span></div>
-    </section></main>
+    <main class="auth-shell">
+        <section class="auth-brand">
+            <div class="brand-mark">CS</div>
+            <p class="eyebrow">CampusSignal</p>
+            <h1>Le campus avance quand les problèmes sont visibles.</h1>
+            <p>Signalez un incident, suivez son évolution et gardez une vue claire sur la vie du campus.</p>
+            <div class="auth-points"><span><b>01</b> Signaler en quelques secondes</span><span><b>02</b> Suivre chaque résolution</span><span><b>03</b> Agir au bon endroit</span></div>
+        </section>
+        <section class="auth-panel">
+            <div class="auth-heading"><p class="eyebrow">Accès sécurisé</p><h2>Ravi de vous revoir.</h2><p class="muted">Connectez-vous à votre espace CampusSignal.</p></div>
+            <h:panelGroup layout="block" styleClass="logout-notice" rendered="#{param.logout eq '1'}">Vous êtes bien déconnecté. À bientôt.</h:panelGroup>
+            <h:form styleClass="report-form"><h:messages styleClass="messages"/>
+                <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{loginBean.email}" required="true" requiredMessage="L'email est obligatoire." autocomplete="email"/></div>
+                <div class="field"><div class="field-label-row"><h:outputLabel for="password" value="Mot de passe"/><span class="field-hint">Votre accès CampusSignal</span></div><h:inputSecret id="password" value="#{loginBean.password}" required="true" requiredMessage="Le mot de passe est obligatoire." autocomplete="current-password"/></div>
+                <h:commandButton value="Se connecter" action="#{loginBean.login}" styleClass="button button-primary form-submit"/>
+            </h:form>
+            <p class="auth-link">Pas encore de compte ? <h:link value="Créer un compte étudiant" outcome="register"/></p>
+            <div class="demo-access"><strong>Accès de démonstration</strong><span><b>Étudiant</b> student@campus.local · student123</span><span><b>Responsable</b> admin@campus.local · admin123</span></div>
+        </section>
+    </main>
 </h:body>
 </html>

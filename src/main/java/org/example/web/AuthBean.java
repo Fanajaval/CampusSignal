@@ -24,6 +24,6 @@ public class AuthBean implements Serializable {
         currentUser = null;
         var context = jakarta.faces.context.FacesContext.getCurrentInstance();
         context.getExternalContext().invalidateSession();
-        context.getExternalContext().redirect("login.xhtml");
+        context.getExternalContext().redirect("login.xhtml?logout=1");
     }
 }
