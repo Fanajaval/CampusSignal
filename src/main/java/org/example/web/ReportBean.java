@@ -48,7 +48,7 @@ public class ReportBean {
     public ReportStatus[] getStatuses() { return ReportStatus.values(); }
 
     public long getSignaleCount() { return countByStatus(ReportStatus.SIGNALE); }
-    public long getEnCoursCount() { return countByStatus(ReportStatus.EN_COURS); }
+    public long getRecuCount() { return countByStatus(ReportStatus.RECU); }
     public long getResoluCount() { return countByStatus(ReportStatus.RESOLU); }
 
     public long countByStatus(ReportStatus status) {

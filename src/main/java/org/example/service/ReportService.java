@@ -21,7 +21,7 @@ public class ReportService {
                 "Batiment B - Rez-de-chaussee", "student@campus.local", ReportCategory.EAU);
         Report report = addReport("Ordinateur en panne", "Le poste ne demarre plus.",
                 "Bibliotheque", "student@campus.local", ReportCategory.INFORMATIQUE);
-        report.setStatus(ReportStatus.EN_COURS);
+        report.setStatus(ReportStatus.RECU);
     }
 
     public List<Report> findAll() { return List.copyOf(reports); }

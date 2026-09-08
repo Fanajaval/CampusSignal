@@ -13,7 +13,7 @@
         <section class="auth-panel">
             <div class="auth-heading"><p class="eyebrow">Accès sécurisé</p><h2>Ravi de vous revoir.</h2><p class="muted">Connectez-vous à votre espace CampusSignal.</p></div>
             <h:panelGroup layout="block" styleClass="logout-notice" rendered="#{param.logout eq '1'}">Vous êtes bien déconnecté. À bientôt.</h:panelGroup>
-            <h:form styleClass="report-form"><h:messages styleClass="messages"/>
+            <h:form styleClass="report-form"><h:messages styleClass="messages" showDetail="true"/>
                 <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{loginBean.email}" required="true" requiredMessage="L'email est obligatoire." autocomplete="email"/></div>
                 <div class="field"><div class="field-label-row"><h:outputLabel for="password" value="Mot de passe"/><span class="field-hint">Votre accès CampusSignal</span></div><h:inputSecret id="password" value="#{loginBean.password}" required="true" requiredMessage="Le mot de passe est obligatoire." autocomplete="current-password"/></div>
                 <h:commandButton value="Se connecter" action="#{loginBean.login}" styleClass="button button-primary form-submit"/>

@@ -1,7 +1,7 @@
 package org.example.model;
 
 public enum ReportStatus {
-    SIGNALE("Signale"), EN_COURS("En cours"), RESOLU("Resolu");
+    SIGNALE("Signalé"), RECU("Reçu"), RESOLU("Résolu");
 
     private final String label;
 

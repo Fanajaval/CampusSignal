@@ -25,7 +25,7 @@ public class LoginBean {
         User user = userService.authenticate(email, password);
         if (user == null) {
             String detail = userService.isPending(email)
-                ? "Votre compte attend encore la validation d'un responsable."
+                ? "Votre compte est en attente de validation par le responsable. Veuillez patienter jusqu'à ce qu'une décision soit prise."
                 : "Email ou mot de passe incorrect.";
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
