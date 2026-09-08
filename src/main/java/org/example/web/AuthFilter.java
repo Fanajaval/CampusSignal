@@ -34,10 +34,11 @@ public class AuthFilter implements Filter {
         }
         if ((path.equals("/admin.xhtml") || path.equals("/admin-users.xhtml") || path.equals("/admin-reports.xhtml"))
             && user.getRole() != UserRole.RESPONSABLE) {
-            httpResponse.sendRedirect(httpRequest.getContextPath() + "/student.xhtml");
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/dashboard.xhtml");
             return;
         }
-        if (path.equals("/student.xhtml") && user.getRole() != UserRole.ETUDIANT) {
+        if ((path.equals("/student.xhtml") || path.equals("/dashboard.xhtml") || path.equals("/my-reports.xhtml")) 
+            && user.getRole() != UserRole.ETUDIANT) {
             httpResponse.sendRedirect(httpRequest.getContextPath() + "/admin.xhtml");
             return;
         }

@@ -75,7 +75,7 @@ public class ReportBean {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO, "Signalement cree",
                         "Le signalement a bien ete enregistre."));
-        FacesContext.getCurrentInstance().getExternalContext().redirect("student.xhtml");
+        FacesContext.getCurrentInstance().getExternalContext().redirect("my-reports.xhtml");
     }
 
     public String getTitle() { return title; }

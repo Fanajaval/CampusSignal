@@ -3,9 +3,9 @@
 <h:head><title>CampusSignal - Inscription</title><h:outputStylesheet library="css" name="app.css"/></h:head>
 <h:body>
     <main class="auth-shell">
-        <section class="auth-brand"><div class="brand-mark">CS</div><p class="eyebrow">CampusSignal</p><h1>Votre voix améliore le quotidien.</h1><p>Créez votre compte étudiant et gardez la main sur chaque signalement.</p><div class="auth-points"><span><b>01</b> Un espace personnel</span><span><b>02</b> Des statuts transparents</span><span><b>03</b> Un campus plus réactif</span></div></section>
+        <section class="auth-brand"><div class="brand-mark">CS</div><div class="institution-lockup"><span class="institution-kicker">Portail universitaire</span><strong>Université de Fianarantsoa</strong><span>CampusSignal</span></div><p class="eyebrow">Espace campus</p><h1>Votre voix améliore le quotidien.</h1><p>Créez votre compte étudiant et gardez la main sur chaque signalement.</p><div class="auth-points"><span><b>01</b> Un espace personnel</span><span><b>02</b> Des statuts transparents</span><span><b>03</b> Un campus plus réactif</span></div></section>
         <section class="auth-panel"><div class="auth-heading"><p class="eyebrow">Université de Fianarantsoa</p><h2>Rejoindre CampusSignal.</h2><p class="muted">Créez votre compte étudiant pour le campus de l'Université de Fianarantsoa.</p></div>
-            <h:form styleClass="report-form"><h:messages styleClass="messages" globalOnly="true"/>
+            <h:form styleClass="report-form"><h:messages styleClass="messages" errorClass="toast toast-error" infoClass="toast toast-success" warnClass="toast toast-warning" fatalClass="toast toast-error" showSummary="true" showDetail="true" globalOnly="true"/>
                 <div class="field"><h:outputLabel for="displayName" value="Nom complet"/><h:inputText id="displayName" value="#{registerBean.displayName}" required="true" requiredMessage="Le nom est obligatoire." autocomplete="name"/></div>
                 <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{registerBean.email}" required="true" requiredMessage="L'email est obligatoire." autocomplete="email"/></div>
                 <div class="field"><h:outputLabel for="institution" value="École ou Faculté"/><h:inputText id="institution" value="#{registerBean.institution}" required="true" requiredMessage="L'école ou la faculté est obligatoire." pt:placeholder="Ex. : Faculté des Sciences" autocomplete="organization"/><span class="field-hint">Ex. : Faculté des Sciences, Faculté de Droit et de Sciences Politiques</span></div>
@@ -16,5 +16,15 @@
             </h:form><p class="auth-link">Vous avez déjà un compte ? <h:link value="Se connecter" outcome="login"/></p>
         </section>
     </main>
+    <h:outputScript target="body">
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast').forEach(function (toast) {
+                toast.classList.add('toast-visible');
+                var close = toast.querySelector('.toast-close');
+                if (close) close.addEventListener('click', function () { toast.classList.remove('toast-visible'); });
+                window.setTimeout(function () { toast.classList.remove('toast-visible'); }, 6500);
+            });
+        });
+    </h:outputScript>
 </h:body>
 </html>

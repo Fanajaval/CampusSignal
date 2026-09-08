@@ -2,6 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core">
 <f:metadata><f:viewParam name="id" value="#{reportBean.selectedId}"/></f:metadata>
 <h:head><title>CampusSignal - Détail</title><h:outputStylesheet library="css" name="app.css"/></h:head>
-<h:body><header class="topbar"><div><span class="eyebrow">Signalement ##{reportBean.selectedReport.id}</span><h1>Détail du problème</h1></div><h:link value="Accueil" outcome="index" styleClass="button button-quiet"/></header>
+<h:body><header class="topbar"><div><span class="eyebrow">Signalement ##{reportBean.selectedReport.id}</span><h1>Détail du problème</h1></div>
+    <div class="nav-actions">
+        <h:link value="Tableau de bord" outcome="dashboard" styleClass="button button-quiet"/>
+        <h:link value="Mes signalements" outcome="my-reports" styleClass="button button-quiet"/>
+    </div>
+</header>
 <main class="page-shell narrow-shell"><section class="form-panel"><div class="report-title-line"><div><p class="eyebrow">#{reportBean.selectedReport.category.label}</p><h2>#{reportBean.selectedReport.title}</h2></div><span class="status status-#{reportBean.selectedReport.status}">#{reportBean.selectedReport.status.label}</span></div><p class="detail-description">#{reportBean.selectedReport.description}</p><div class="detail-grid"><div><span class="eyebrow">Lieu</span><strong>#{reportBean.selectedReport.location}</strong></div><div><span class="eyebrow">Déclarant</span><strong>#{reportBean.selectedReport.reporter}</strong></div></div></section></main></h:body>
 </html>

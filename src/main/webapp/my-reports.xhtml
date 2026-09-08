@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core" xmlns:ui="jakarta.faces.facelets">
+<h:head><title>CampusSignal - Mes signalements</title><h:outputStylesheet library="css" name="app.css"/></h:head>
+<h:body>
+    <header class="topbar">
+        <div><span class="eyebrow">Espace étudiant</span><h1>Mes signalements</h1></div>
+        <div class="nav-actions">
+            <h:link value="Tableau de bord" outcome="dashboard" styleClass="button button-quiet"/>
+            <h:link value="Mes signalements" outcome="my-reports" styleClass="button button-quiet"/>
+            <h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-quiet"/></h:form>
+        </div>
+    </header>
+    <main class="page-shell">
+        <section class="intro">
+            <p class="eyebrow">Gestion</p>
+            <h2>Mes signalements</h2>
+            <p class="muted">Gérez et suivez l'état de vos signalements.</p>
+        </section>
+        <section class="content-section">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Historique</p>
+                    <h2>Mes demandes</h2>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span class="muted">#{reportBean.myReports.size()} signalement(s)</span>
+                    <h:link value="+ Nouveau" outcome="create-report" styleClass="button button-primary"/>
+                </div>
+            </div>
+            <h:panelGroup layout="block" styleClass="empty-state" rendered="#{empty reportBean.myReports}">
+                <strong>Aucun signalement pour le moment.</strong>
+                <span>Déclarez un problème pour commencer son suivi.</span>
+                <h:link value="Créer un signalement" outcome="create-report" styleClass="button button-primary"/>
+            </h:panelGroup>
+            <div class="report-list">
+                <ui:repeat value="#{reportBean.myReports}" var="report">
+                    <article class="report-row">
+                        <div class="report-marker"></div>
+                        <div class="report-main">
+                            <div class="report-title-line">
+                                <h3>#{report.title}</h3>
+                                <span class="status status-#{report.status}">#{report.status.label}</span>
+                            </div>
+                            <p>#{report.description}</p>
+                            <div class="report-meta">
+                                <span>#{report.category.label}</span>
+                                <span>#{report.location}</span>
+                                <h:link value="Voir les détails" outcome="report-details">
+                                    <f:param name="id" value="#{report.id}"/>
+                                </h:link>
+                            </div>
+                        </div>
+                    </article>
+                </ui:repeat>
+            </div>
+        </section>
+    </main>
+</h:body>
+</html>

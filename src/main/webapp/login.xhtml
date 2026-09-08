@@ -5,15 +5,16 @@
     <main class="auth-shell">
         <section class="auth-brand">
             <div class="brand-mark">CS</div>
-            <p class="eyebrow">CampusSignal</p>
-            <h1>Le campus avance quand les problèmes sont visibles.</h1>
+            <div class="institution-lockup"><span class="institution-kicker">Portail universitaire</span><strong>Université de Fianarantsoa</strong><span>CampusSignal</span></div>
+            <p class="eyebrow">Espace campus</p>
+            <h1>Un campus plus réactif, ensemble.</h1>
             <p>Signalez un incident, suivez son évolution et gardez une vue claire sur la vie du campus.</p>
             <div class="auth-points"><span><b>01</b> Signaler en quelques secondes</span><span><b>02</b> Suivre chaque résolution</span><span><b>03</b> Agir au bon endroit</span></div>
         </section>
         <section class="auth-panel">
             <div class="auth-heading"><p class="eyebrow">Accès sécurisé</p><h2>Ravi de vous revoir.</h2><p class="muted">Connectez-vous à votre espace CampusSignal.</p></div>
-            <h:panelGroup layout="block" styleClass="logout-notice" rendered="#{param.logout eq '1'}">Vous êtes bien déconnecté. À bientôt.</h:panelGroup>
-            <h:form styleClass="report-form"><h:messages styleClass="messages" showDetail="true"/>
+            <h:panelGroup layout="block" styleClass="toast toast-success" rendered="#{param.logout eq '1'}"><span class="toast-icon">✓</span><span class="toast-copy"><strong>Déconnexion réussie</strong><small>Votre session a été fermée en toute sécurité.</small></span><button type="button" class="toast-close" aria-label="Fermer">×</button></h:panelGroup>
+            <h:form styleClass="report-form"><h:messages styleClass="messages" errorClass="toast toast-error" infoClass="toast toast-info" warnClass="toast toast-warning" fatalClass="toast toast-error" showSummary="true" showDetail="true"/>
                 <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{loginBean.email}" required="true" requiredMessage="L'email est obligatoire." autocomplete="email"/></div>
                 <div class="field"><div class="field-label-row"><h:outputLabel for="password" value="Mot de passe"/><span class="field-hint">Votre accès CampusSignal</span></div><h:inputSecret id="password" value="#{loginBean.password}" required="true" requiredMessage="Le mot de passe est obligatoire." autocomplete="current-password"/></div>
                 <h:commandButton value="Se connecter" action="#{loginBean.login}" styleClass="button button-primary form-submit"/>
@@ -22,5 +23,15 @@
             <div class="demo-access"><strong>Accès de démonstration</strong><span><b>Étudiant</b> student@campus.local · student123</span><span><b>Responsable</b> admin@campus.local · admin123</span></div>
         </section>
     </main>
+    <h:outputScript target="body">
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast').forEach(function (toast) {
+                toast.classList.add('toast-visible');
+                var close = toast.querySelector('.toast-close');
+                if (close) close.addEventListener('click', function () { toast.classList.remove('toast-visible'); });
+                window.setTimeout(function () { toast.classList.remove('toast-visible'); }, 6500);
+            });
+        });
+    </h:outputScript>
 </h:body>
 </html>

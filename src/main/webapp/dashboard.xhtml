@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core">
+<h:head><title>CampusSignal - Tableau de bord</title><h:outputStylesheet library="css" name="app.css"/></h:head>
+<h:body>
+    <header class="topbar">
+        <div><span class="eyebrow">Espace étudiant</span><h1>Tableau de bord</h1></div>
+        <div class="nav-actions">
+            <h:link value="Tableau de bord" outcome="dashboard" styleClass="button button-quiet"/>
+            <h:link value="Mes signalements" outcome="my-reports" styleClass="button button-quiet"/>
+            <h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-quiet"/></h:form>
+        </div>
+    </header>
+    <main class="page-shell">
+        <section class="intro">
+            <p class="eyebrow">Bienvenue</p>
+            <h2>Bonjour, #{reportBean.reporter}.</h2>
+            <p class="muted">Voici un aperçu de vos signalements.</p>
+        </section>
+        <section class="stats-grid">
+            <article class="stat-card stat-yellow">
+                <span class="stat-label">Signalés</span>
+                <strong>#{reportBean.signaleCount}</strong>
+            </article>
+            <article class="stat-card stat-blue">
+                <span class="stat-label">Reçus</span>
+                <strong>#{reportBean.recuCount}</strong>
+            </article>
+            <article class="stat-card stat-green">
+                <span class="stat-label">Résolus</span>
+                <strong>#{reportBean.resoluCount}</strong>
+            </article>
+        </section>
+        <section class="content-section">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Accès rapide</p>
+                    <h2>Actions</h2>
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <h:link value="Créer un signalement" outcome="create-report" styleClass="button button-primary"/>
+                <h:link value="Voir tous mes signalements" outcome="my-reports" styleClass="button button-quiet"/>
+            </div>
+        </section>
+    </main>
+</h:body>
+</html>

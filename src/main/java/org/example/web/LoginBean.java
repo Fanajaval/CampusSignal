@@ -24,16 +24,19 @@ public class LoginBean {
     public void login() throws IOException {
         User user = userService.authenticate(email, password);
         if (user == null) {
+            String summary = userService.isPending(email)
+                ? "Validation de votre compte en cours"
+                : "Impossible de vous connecter";
             String detail = userService.isPending(email)
-                ? "Votre compte est en attente de validation par le responsable. Veuillez patienter jusqu'à ce qu'une décision soit prise."
-                : "Email ou mot de passe incorrect.";
+                ? "Votre demande est toujours en attente de validation par un responsable. Veuillez patienter jusqu'à ce qu'une décision soit prise."
+                : "Vérifiez votre adresse email et votre mot de passe, puis réessayez.";
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                    "Connexion refusée", detail));
+                    summary, detail));
             return;
         }
         authBean.login(user);
-        String destination = user.getRole().name().equals("RESPONSABLE") ? "admin.xhtml" : "student.xhtml";
+        String destination = user.getRole().name().equals("RESPONSABLE") ? "admin.xhtml" : "dashboard.xhtml";
         FacesContext.getCurrentInstance().getExternalContext().redirect(destination);
     }
 
