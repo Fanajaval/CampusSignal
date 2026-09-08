@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core">
 <f:metadata><f:viewParam name="id" value="#{reportBean.selectedId}"/></f:metadata>
-<h:head><title>CampusSignal - Détail</title><h:outputStylesheet library="css" name="app.css"/></h:head>
+<h:head><title>CampusSignal - Détail</title><h:outputStylesheet library="css" name="app.css"/><h:outputScript library="js" name="toast.js" target="head"/></h:head>
 <h:body><header class="topbar"><div><span class="eyebrow">Signalement ##{reportBean.selectedReport.id}</span><h1>Détail du problème</h1></div>
     <div class="nav-actions">
         <h:link value="Tableau de bord" outcome="dashboard" styleClass="button button-quiet"/>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html">
-<h:head><title>CampusSignal - Connexion</title><h:outputStylesheet library="css" name="app.css"/></h:head>
+<h:head><title>CampusSignal - Connexion</title><h:outputStylesheet library="css" name="app.css"/><h:outputScript library="js" name="toast.js" target="head"/></h:head>
 <h:body>
     <main class="auth-shell">
         <section class="auth-brand">
@@ -23,15 +23,5 @@
             <div class="demo-access"><strong>Accès de démonstration</strong><span><b>Étudiant</b> student@campus.local · student123</span><span><b>Responsable</b> admin@campus.local · admin123</span></div>
         </section>
     </main>
-    <h:outputScript target="body">
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.toast').forEach(function (toast) {
-                toast.classList.add('toast-visible');
-                var close = toast.querySelector('.toast-close');
-                if (close) close.addEventListener('click', function () { toast.classList.remove('toast-visible'); });
-                window.setTimeout(function () { toast.classList.remove('toast-visible'); }, 6500);
-            });
-        });
-    </h:outputScript>
 </h:body>
 </html>
