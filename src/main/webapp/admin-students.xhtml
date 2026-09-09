@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core" xmlns:ui="jakarta.faces.facelets" xmlns:pt="jakarta.faces.passthrough">
+<h:head>
+    <title>CampusSignal - Gestion des étudiants</title>
+    <h:outputStylesheet library="css" name="app.css"/>
+    <h:outputScript library="js" name="toast.js" target="head"/>
+    <h:outputScript library="js" name="modal.js" target="head"/>
+</h:head>
+<h:body>
+    <header class="topbar">
+        <div><span class="eyebrow">Espace responsable</span><h1>Gestion des étudiants</h1></div>
+        <div class="nav-actions">
+            <h:link value="Tableau de bord" outcome="admin" styleClass="button button-quiet"/>
+            <h:link value="Demandes d'inscription" outcome="admin-users" styleClass="button button-quiet"/>
+            <h:link value="Signalements" outcome="admin-reports" styleClass="button button-quiet"/>
+            <h:link value="Étudiants" outcome="admin-students" styleClass="button button-nav-active"/>
+            <h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-danger"/></h:form>
+        </div>
+    </header>
+    
+    <main class="page-shell">
+        <section class="intro">
+            <p class="eyebrow">Gestion des utilisateurs</p>
+            <h2>Administrer les comptes étudiants.</h2>
+            <p class="muted">Ajoutez, modifiez ou supprimez les comptes étudiants du système.</p>
+        </section>
+        
+        <h:form>
+            <h:messages styleClass="messages"/>
+            
+            <!-- Action Bar -->
+            <div class="action-bar">
+                <button type="button" onclick="openModal('add-student-modal')" class="button button-primary">
+                    <span>+</span> Ajouter un étudiant
+                </button>
+            </div>
+            
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <input type="text" id="studentSearchInput" placeholder="Rechercher par nom, email, matricule..." oninput="filterStudents()"/>
+                <select id="studyLevelFilter" onchange="filterStudents()">
+                    <option value="">Tous les niveaux</option>
+                    <ui:repeat value="#{studentAdminBean.studyLevels}" var="level">
+                        <option value="#{level}">#{level.label}</option>
+                    </ui:repeat>
+                </select>
+                <button type="button" onclick="showAllStudents()" class="button button-secondary">
+                    <span>↻</span> Afficher tout
+                </button>
+            </div>
+            
+            <!-- Results counter -->
+            <div class="filter-results">
+                <span class="muted" id="studentResultsCount">0 étudiant(s)</span>
+            </div>
+            
+            <!-- Students Table -->
+            <section class="content-section">
+                <div class="students-table" id="studentsTable">
+                    <div class="table-header">
+                        <div class="table-cell">Nom complet</div>
+                        <div class="table-cell">Email</div>
+                        <div class="table-cell">École/Faculté</div>
+                        <div class="table-cell">Matricule</div>
+                        <div class="table-cell">Niveau</div>
+                        <div class="table-cell">Actions</div>
+                    </div>
+                    <ui:repeat value="#{studentAdminBean.approvedStudents}" var="student">
+                        <div class="table-row"
+                            data-student-name="#{student.displayName}"
+                            data-student-email="#{student.email}"
+                            data-student-number="#{student.studentNumber}"
+                            data-student-level="#{student.studyLevel}">
+                            <div class="table-cell">
+                                <div class="student-info">
+                                    <span class="student-avatar">#{student.displayName.substring(0,1)}</span>
+                                    <strong>#{student.displayName}</strong>
+                                </div>
+                            </div>
+                            <div class="table-cell">#{student.email}</div>
+                            <div class="table-cell">#{student.institution}</div>
+                            <div class="table-cell"><code class="student-code">#{student.studentNumber}</code></div>
+                            <div class="table-cell">
+                                <span class="badge badge-level">#{student.studyLevel.label}</span>
+                            </div>
+                            <div class="table-cell table-actions">
+                                <h:commandButton value="✎" styleClass="btn-icon btn-edit" title="Modifier"
+                                    action="#{studentAdminBean.prepareEdit(student.email)}"
+                                    onclick="openModal('edit-student-modal'); return false;">
+                                    <f:ajax execute="@form" render="@form :editStudentForm"/>
+                                </h:commandButton>
+                                <h:commandButton value="✕" styleClass="btn-icon btn-delete" title="Supprimer"
+                                    action="#{studentAdminBean.deleteStudent(student.email)}"
+                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer #{student.displayName} ?')">
+                                    <f:ajax execute="@this" render="@form"/>
+                                </h:commandButton>
+                            </div>
+                        </div>
+                    </ui:repeat>
+                </div>
+                
+                <!-- No results message -->
+                <div id="noStudentsResults" class="empty-state-large" style="display: none;">
+                    <strong>Aucun étudiant trouvé</strong>
+                    <span>Essayez avec d'autres mots-clés ou filtres.</span>
+                </div>
+            </section>
+        </h:form>
+    </main>
+    
+    <!-- Modal backdrop -->
+    <div id="modal-backdrop" class="modal-backdrop"></div>
+    
+    <!-- Add Student Modal -->
+    <div id="add-student-modal" class="modal-container">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Ajouter un étudiant</h2>
+                <button type="button" class="modal-close" onclick="closeModal('add-student-modal')" aria-label="Fermer">×</button>
+            </div>
+            
+            <h:form id="addStudentForm">
+                <div class="modal-body">
+                    <p class="muted" style="margin-bottom: 1.5rem;">Créez un nouveau compte étudiant directement depuis l'interface d'administration.</p>
+                    
+                    <div style="display: grid; gap: 1.25rem;">
+                        <div class="field">
+                            <h:outputLabel for="displayName" value="Nom complet"/>
+                            <h:inputText id="displayName" value="#{studentAdminBean.displayName}" required="true" 
+                                requiredMessage="Le nom complet est obligatoire." 
+                                pt:placeholder="Ex. : Jean Dupont"/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="email" value="Adresse email"/>
+                            <h:inputText id="email" value="#{studentAdminBean.email}" required="true" 
+                                requiredMessage="L'email est obligatoire." 
+                                pt:placeholder="Ex. : jean.dupont@campus.local"/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="password" value="Mot de passe"/>
+                            <h:inputSecret id="password" value="#{studentAdminBean.password}" required="true" 
+                                requiredMessage="Le mot de passe est obligatoire." 
+                                pt:placeholder="Minimum 8 caractères"/>
+                            <span class="field-hint">Le mot de passe doit contenir au moins 8 caractères.</span>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="institution" value="École / Faculté"/>
+                            <h:inputText id="institution" value="#{studentAdminBean.institution}" required="true" 
+                                requiredMessage="L'école ou faculté est obligatoire." 
+                                pt:placeholder="Ex. : Faculté des Sciences"/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="studentNumber" value="Matricule"/>
+                            <h:inputText id="studentNumber" value="#{studentAdminBean.studentNumber}" required="true" 
+                                requiredMessage="Le matricule est obligatoire." 
+                                pt:placeholder="Ex. : 2024-001"/>
+                            <span class="field-hint">Format: lettres, chiffres, points, tirets (3-30 caractères)</span>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="studyLevel" value="Niveau d'étude"/>
+                            <h:selectOneMenu id="studyLevel" value="#{studentAdminBean.studyLevel}" required="true" 
+                                requiredMessage="Le niveau d'étude est obligatoire.">
+                                <f:selectItem itemLabel="Sélectionner un niveau" noSelectionOption="true"/>
+                                <f:selectItems value="#{studentAdminBean.studyLevels}" var="level" 
+                                    itemValue="#{level}" itemLabel="#{level.label}"/>
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('add-student-modal')" 
+                        class="button button-quiet">Annuler</button>
+                    <h:commandButton value="Créer le compte" 
+                        action="#{studentAdminBean.addStudent}" 
+                        styleClass="button button-primary"
+                        onclick="setTimeout(() => closeModal('add-student-modal'), 100)"/>
+                </div>
+            </h:form>
+        </div>
+    </div>
+    
+    <!-- Edit Student Modal -->
+    <div id="edit-student-modal" class="modal-container">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Modifier l'étudiant</h2>
+                <button type="button" class="modal-close" onclick="closeModal('edit-student-modal')" aria-label="Fermer">×</button>
+            </div>
+            
+            <h:form id="editStudentForm">
+                <div class="modal-body">
+                    <p class="muted" style="margin-bottom: 1.5rem;">Modifiez les informations de l'étudiant.</p>
+                    
+                    <div style="display: grid; gap: 1.25rem;">
+                        <div class="field">
+                            <h:outputLabel for="editDisplayName" value="Nom complet"/>
+                            <h:inputText id="editDisplayName" value="#{studentAdminBean.displayName}" required="true" 
+                                requiredMessage="Le nom complet est obligatoire."/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="editEmail" value="Adresse email"/>
+                            <h:inputText id="editEmail" value="#{studentAdminBean.email}" readonly="true"
+                                styleClass="field-readonly"/>
+                            <span class="field-hint">L'email ne peut pas être modifié</span>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="editInstitution" value="École / Faculté"/>
+                            <h:inputText id="editInstitution" value="#{studentAdminBean.institution}" required="true" 
+                                requiredMessage="L'école ou faculté est obligatoire."/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="editStudentNumber" value="Matricule"/>
+                            <h:inputText id="editStudentNumber" value="#{studentAdminBean.studentNumber}" required="true" 
+                                requiredMessage="Le matricule est obligatoire."/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="editStudyLevel" value="Niveau d'étude"/>
+                            <h:selectOneMenu id="editStudyLevel" value="#{studentAdminBean.studyLevel}" required="true" 
+                                requiredMessage="Le niveau d'étude est obligatoire.">
+                                <f:selectItems value="#{studentAdminBean.studyLevels}" var="level" 
+                                    itemValue="#{level}" itemLabel="#{level.label}"/>
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('edit-student-modal')" 
+                        class="button button-quiet">Annuler</button>
+                    <h:commandButton value="Enregistrer les modifications" 
+                        action="#{studentAdminBean.updateStudent}" 
+                        styleClass="button button-primary"
+                        onclick="setTimeout(() => closeModal('edit-student-modal'), 100)">
+                        <f:ajax execute="@form" render="@form :addStudentForm"/>
+                    </h:commandButton>
+                </div>
+            </h:form>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+    //<![CDATA[
+        var totalStudents = 0;
+        
+        // Count students on page load
+        window.addEventListener('load', function() {
+            updateStudentCount();
+        });
+        
+        function updateStudentCount() {
+            totalStudents = document.querySelectorAll('.table-row').length;
+            var counter = document.getElementById('studentResultsCount');
+            if (counter) {
+                counter.textContent = totalStudents + ' étudiant(s)';
+            }
+        }
+        
+        function filterStudents() {
+            var searchInput = document.getElementById('studentSearchInput');
+            var levelFilter = document.getElementById('studyLevelFilter');
+            
+            if (!searchInput || !levelFilter) {
+                return;
+            }
+            
+            var searchText = searchInput.value.toLowerCase();
+            var levelValue = levelFilter.value;
+            var studentRows = document.querySelectorAll('.table-row');
+            var visibleCount = 0;
+            
+            studentRows.forEach(function(row) {
+                var name = (row.getAttribute('data-student-name') || '').toLowerCase();
+                var email = (row.getAttribute('data-student-email') || '').toLowerCase();
+                var number = (row.getAttribute('data-student-number') || '').toLowerCase();
+                var level = row.getAttribute('data-student-level') || '';
+                
+                var matchesSearch = name.includes(searchText) || 
+                                  email.includes(searchText) || 
+                                  number.includes(searchText);
+                var matchesLevel = !levelValue || level === levelValue;
+                
+                if (matchesSearch && matchesLevel) {
+                    row.style.display = 'grid';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Update counter
+            var resultsText = visibleCount + ' étudiant(s)';
+            if (searchText || levelValue) {
+                resultsText += ' sur ' + totalStudents;
+            }
+            var counter = document.getElementById('studentResultsCount');
+            if (counter) {
+                counter.textContent = resultsText;
+            }
+            
+            // Show/hide no results message
+            var noResults = document.getElementById('noStudentsResults');
+            var studentsTable = document.getElementById('studentsTable');
+            if (noResults && studentsTable) {
+                if (visibleCount === 0 && totalStudents > 0) {
+                    noResults.style.display = 'grid';
+                    studentsTable.style.display = 'none';
+                } else {
+                    noResults.style.display = 'none';
+                    studentsTable.style.display = 'block';
+                }
+            }
+        }
+        
+        function showAllStudents() {
+            var searchInput = document.getElementById('studentSearchInput');
+            var levelFilter = document.getElementById('studyLevelFilter');
+            
+            if (searchInput) searchInput.value = '';
+            if (levelFilter) levelFilter.value = '';
+            
+            filterStudents();
+        }
+        
+        // Re-update count after AJAX operations
+        if (typeof jsf !== 'undefined') {
+            jsf.ajax.addOnEvent(function(data) {
+                if (data.status === 'success') {
+                    setTimeout(function() {
+                        updateStudentCount();
+                        filterStudents();
+                    }, 100);
+                }
+            });
+        }
+    //]]>
+    </script>
+</h:body>
+</html>

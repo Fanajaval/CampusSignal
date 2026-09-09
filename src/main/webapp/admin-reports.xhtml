@@ -1,6 +1,92 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core" xmlns:ui="jakarta.faces.facelets">
 <h:head><title>CampusSignal - Signalements</title><h:outputStylesheet library="css" name="app.css"/><h:outputScript library="js" name="toast.js" target="head"/></h:head>
-<h:body><header class="topbar"><div><span class="eyebrow">Espace responsable</span><h1>Signalements</h1></div><div class="nav-actions"><h:link value="Tableau de bord" outcome="admin" styleClass="button button-quiet"/><h:link value="Demandes d'inscription" outcome="admin-users" styleClass="button button-quiet"/><h:link value="Signalements" outcome="admin-reports" styleClass="button button-nav-active"/><h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-danger"/></h:form></div></header>
-<main class="page-shell"><section class="intro"><p class="eyebrow">Opérations</p><h2>Suivre les problèmes du campus.</h2><p class="muted">Recherchez un signalement et mettez à jour son avancement.</p></section><h:form><h:messages styleClass="messages"/><section class="filter-bar"><h:inputText value="#{reportBean.searchText}" placeholder="Rechercher par titre, lieu..."/><h:selectOneMenu value="#{reportBean.filterStatus}"><f:selectItem itemLabel="Tous les statuts" noSelectionOption="true"/><f:selectItems value="#{reportBean.statuses}" var="status" itemValue="#{status}" itemLabel="#{status.label}"/></h:selectOneMenu><h:commandButton value="Rechercher" styleClass="button button-primary"/></section><section class="content-section"><div class="section-heading"><div><p class="eyebrow">Résultats</p><h2>Liste des signalements</h2></div><span class="muted">#{reportBean.filteredReports.size()} résultat(s)</span></div><div class="report-list"><ui:repeat value="#{reportBean.filteredReports}" var="report"><article class="report-row"><div class="report-marker"></div><div class="report-main"><div class="report-title-line"><h3>#{report.title}</h3><span class="status status-#{report.status}">#{report.status.label}</span></div><p>#{report.description}</p><div class="report-meta"><span>#{report.category.label}</span><span>#{report.location}</span><span>#{report.reporter}</span><h:link value="Détails" outcome="report-details"><f:param name="id" value="#{report.id}"/></h:link></div><div class="inline-status"><h:selectOneMenu value="#{report.status}"><f:selectItems value="#{reportBean.statuses}" var="status" itemValue="#{status}" itemLabel="#{status.label}"/></h:selectOneMenu><h:commandButton value="Enregistrer le statut" action="#{reportBean.updateStatus(report.id, report.status)}" styleClass="button button-small"/></div></div></article></ui:repeat></div></section></h:form></main>
+<h:body><header class="topbar"><div><span class="eyebrow">Espace responsable</span><h1>Signalements</h1></div><div class="nav-actions"><h:link value="Tableau de bord" outcome="admin" styleClass="button button-quiet"/><h:link value="Demandes d'inscription" outcome="admin-users" styleClass="button button-quiet"/><h:link value="Signalements" outcome="admin-reports" styleClass="button button-nav-active"/><h:link value="Étudiants" outcome="admin-students" styleClass="button button-quiet"/><h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-danger"/></h:form></div></header>
+<main class="page-shell"><section class="intro"><p class="eyebrow">Opérations</p><h2>Suivre les problèmes du campus.</h2><p class="muted">Recherchez un signalement et mettez à jour son avancement.</p></section><h:form><h:messages styleClass="messages"/>
+<section class="filter-bar">
+    <input type="text" id="adminSearchInput" placeholder="Rechercher par titre, lieu, déclarant..." oninput="filterAdminReports()"/>
+    <select id="adminStatusFilter" onchange="filterAdminReports()">
+        <option value="">Tous les statuts</option>
+        <ui:repeat value="#{reportBean.statuses}" var="status">
+            <option value="#{status}">#{status.label}</option>
+        </ui:repeat>
+    </select>
+    <button type="button" onclick="showAllAdminReports()" class="button button-secondary">
+        <span>↻</span> Afficher tout
+    </button>
+</section>
+<div class="filter-results">
+    <span class="muted" id="adminResultsCount">#{reportBean.reports.size()} signalement(s)</span>
+</div>
+<section class="content-section"><div class="section-heading"><div><p class="eyebrow">Résultats</p><h2>Liste des signalements</h2></div></div><div class="report-list" id="adminReportList"><ui:repeat value="#{reportBean.reports}" var="report"><article class="report-row"
+    data-report-title="#{report.title}"
+    data-report-location="#{report.location}"
+    data-report-reporter="#{report.reporter}"
+    data-report-category="#{report.category.label}"
+    data-report-status-class="#{report.status}"><div class="report-marker"></div><div class="report-main"><div class="report-title-line"><h3>#{report.title}</h3><span class="status status-#{report.status}">#{report.status.label}</span></div><p>#{report.description}</p><div class="report-meta"><span>#{report.category.label}</span><span>#{report.location}</span><span>#{report.reporter}</span><h:link value="Détails" outcome="report-details"><f:param name="id" value="#{report.id}"/></h:link></div><div class="inline-status"><h:selectOneMenu value="#{report.status}"><f:selectItems value="#{reportBean.statuses}" var="status" itemValue="#{status}" itemLabel="#{status.label}"/></h:selectOneMenu><h:commandButton value="Enregistrer le statut" action="#{reportBean.updateStatus(report.id, report.status)}" styleClass="button button-small"/></div></div></article></ui:repeat></div>
+<div id="adminNoResults" class="empty-state-large" style="display: none;">
+    <strong>Aucun résultat trouvé</strong>
+    <span>Essayez avec d'autres mots-clés ou filtres.</span>
+</div>
+</section></h:form>
+
+<script type="text/javascript">
+//<![CDATA[
+    var totalAdminReports = #{reportBean.reports.size()};
+    
+    function filterAdminReports() {
+        var searchText = document.getElementById('adminSearchInput').value.toLowerCase();
+        var statusFilter = document.getElementById('adminStatusFilter').value;
+        var reportRows = document.querySelectorAll('#adminReportList .report-row');
+        var visibleCount = 0;
+        
+        reportRows.forEach(function(row) {
+            var title = row.getAttribute('data-report-title').toLowerCase();
+            var location = row.getAttribute('data-report-location').toLowerCase();
+            var reporter = row.getAttribute('data-report-reporter').toLowerCase();
+            var category = row.getAttribute('data-report-category').toLowerCase();
+            var statusClass = row.getAttribute('data-report-status-class');
+            
+            var matchesSearch = title.includes(searchText) || 
+                              location.includes(searchText) || 
+                              reporter.includes(searchText) ||
+                              category.includes(searchText);
+            var matchesStatus = !statusFilter || statusClass === statusFilter;
+            
+            if (matchesSearch && matchesStatus) {
+                row.style.display = 'flex';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update counter
+        var resultsText = visibleCount + ' signalement(s)';
+        if (searchText || statusFilter) {
+            resultsText += ' sur ' + totalAdminReports;
+        }
+        document.getElementById('adminResultsCount').textContent = resultsText;
+        
+        // Show/hide no results message
+        var noResults = document.getElementById('adminNoResults');
+        var reportList = document.getElementById('adminReportList');
+        if (visibleCount === 0 && totalAdminReports > 0) {
+            noResults.style.display = 'grid';
+            reportList.style.display = 'none';
+        } else {
+            noResults.style.display = 'none';
+            reportList.style.display = 'grid';
+        }
+    }
+    
+    function showAllAdminReports() {
+        document.getElementById('adminSearchInput').value = '';
+        document.getElementById('adminStatusFilter').value = '';
+        filterAdminReports();
+    }
+//]]>
+</script>
+
+</main>
 </h:body></html>

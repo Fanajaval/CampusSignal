@@ -14,11 +14,28 @@
         <section class="content-section">
             <div class="section-heading">
                 <h2>Mes demandes</h2>
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span class="muted" style="font-size: .875rem;">#{reportBean.myReports.size()} signalement(s)</span>
-                    <button type="button" onclick="openModal('create-report-modal')" class="button button-primary">Nouveau</button>
-                </div>
+                <button type="button" onclick="openModal('create-report-modal')" class="button button-primary">Nouveau</button>
             </div>
+            
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <input type="text" id="searchInput" placeholder="Rechercher par titre, lieu, catégorie..." oninput="filterReports()"/>
+                <select id="statusFilter" onchange="filterReports()">
+                    <option value="">Tous les statuts</option>
+                    <ui:repeat value="#{reportBean.statuses}" var="status">
+                        <option value="#{status}">#{status.label}</option>
+                    </ui:repeat>
+                </select>
+                <button type="button" onclick="showAllReports()" class="button button-secondary">
+                    <span>↻</span> Afficher tout
+                </button>
+            </div>
+            
+            <!-- Results counter -->
+            <div class="filter-results">
+                <span class="muted" id="resultsCount">#{reportBean.myReports.size()} signalement(s)</span>
+            </div>
+            
             <h:panelGroup layout="block" styleClass="empty-state-large" rendered="#{empty reportBean.myReports}">
                 <strong>Aucun signalement pour le moment</strong>
                 <span>Commencez par créer votre premier signalement.</span>
@@ -26,7 +43,7 @@
                     Créer un signalement
                 </button>
             </h:panelGroup>
-            <div class="report-list">
+            <div class="report-list" id="reportList">
                 <ui:repeat value="#{reportBean.myReports}" var="report">
                     <article class="report-row" 
                         data-report-id="#{report.id}"
@@ -54,6 +71,12 @@
                         </div>
                     </article>
                 </ui:repeat>
+            </div>
+            
+            <!-- No results message -->
+            <div id="noResults" class="empty-state-large" style="display: none;">
+                <strong>Aucun résultat trouvé</strong>
+                <span>Essayez avec d'autres mots-clés ou filtres.</span>
             </div>
         </section>
     </main>
@@ -145,5 +168,61 @@
             </div>
         </div>
     </div>
+    
+    <script type="text/javascript">
+    //<![CDATA[
+        var totalReports = #{reportBean.myReports.size()};
+        
+        function filterReports() {
+            var searchText = document.getElementById('searchInput').value.toLowerCase();
+            var statusFilter = document.getElementById('statusFilter').value;
+            var reportRows = document.querySelectorAll('.report-row');
+            var visibleCount = 0;
+            
+            reportRows.forEach(function(row) {
+                var title = row.getAttribute('data-report-title').toLowerCase();
+                var location = row.getAttribute('data-report-location').toLowerCase();
+                var category = row.getAttribute('data-report-category').toLowerCase();
+                var statusClass = row.getAttribute('data-report-status-class');
+                
+                var matchesSearch = title.includes(searchText) || 
+                                  location.includes(searchText) || 
+                                  category.includes(searchText);
+                var matchesStatus = !statusFilter || statusClass === statusFilter;
+                
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Update counter
+            var resultsText = visibleCount + ' signalement(s)';
+            if (searchText || statusFilter) {
+                resultsText += ' sur ' + totalReports;
+            }
+            document.getElementById('resultsCount').textContent = resultsText;
+            
+            // Show/hide no results message
+            var noResults = document.getElementById('noResults');
+            var reportList = document.getElementById('reportList');
+            if (visibleCount === 0 && totalReports > 0) {
+                noResults.style.display = 'grid';
+                reportList.style.display = 'none';
+            } else {
+                noResults.style.display = 'none';
+                reportList.style.display = 'grid';
+            }
+        }
+        
+        function showAllReports() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            filterReports();
+        }
+    //]]>
+    </script>
 </h:body>
 </html>
