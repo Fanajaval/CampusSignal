@@ -7,19 +7,16 @@
         <div class="nav-actions">
             <h:link value="Tableau de bord" outcome="dashboard" styleClass="button button-quiet"/>
             <h:link value="Mes signalements" outcome="my-reports" styleClass="button button-nav-active"/>
-            <h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-quiet"/></h:form>
+            <h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-danger"/></h:form>
         </div>
     </header>
     <main class="page-shell">
         <section class="content-section">
             <div class="section-heading">
-                <div>
-                    <p class="eyebrow">Historique</p>
-                    <h2>Mes demandes</h2>
-                </div>
+                <h2>Mes demandes</h2>
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span class="muted">#{reportBean.myReports.size()} signalement(s)</span>
-                    <button type="button" onclick="openModal('create-report-modal')" class="button button-primary">+ Nouveau</button>
+                    <span class="muted" style="font-size: .875rem;">#{reportBean.myReports.size()} signalement(s)</span>
+                    <button type="button" onclick="openModal('create-report-modal')" class="button button-primary">Nouveau</button>
                 </div>
             </div>
             <h:panelGroup layout="block" styleClass="empty-state" rendered="#{empty reportBean.myReports}">
@@ -40,9 +37,9 @@
                             <div class="report-meta">
                                 <span>#{report.category.label}</span>
                                 <span>#{report.location}</span>
-                                <h:link value="Voir les détails" outcome="report-details">
-                                    <f:param name="id" value="#{report.id}"/>
-                                </h:link>
+                                <a href="#" onclick="openReportDetail(#{report.id}); return false;" class="report-link">
+                                    Voir les détails
+                                </a>
                             </div>
                         </div>
                     </article>
@@ -121,5 +118,79 @@
             </h:form>
         </div>
     </div>
+    
+    <!-- Report Detail Modal -->
+    <div id="report-detail-modal" class="modal-container">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Détails du signalement</h2>
+                <button type="button" class="modal-close" onclick="closeModal('report-detail-modal')" aria-label="Fermer">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="report-detail-content" class="detail-panel">
+                    <!-- Content loaded dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('report-detail-modal')" class="button button-quiet">Fermer</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function openReportDetail(reportId) {
+            // Get report data from the page
+            const reports = [
+                <ui:repeat value="#{reportBean.myReports}" var="r" varStatus="status">
+                    {
+                        id: #{r.id},
+                        title: "#{r.title}",
+                        description: "#{r.description}",
+                        category: "#{r.category.label}",
+                        location: "#{r.location}",
+                        reporter: "#{r.reporter}",
+                        status: "#{r.status.label}",
+                        statusClass: "#{r.status}"
+                    }#{not status.last ? ',' : ''}
+                </ui:repeat>
+            ];
+            
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            const content = document.getElementById('report-detail-content');
+            content.innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-header-content">
+                        <h2>${report.title}</h2>
+                        <span class="status status-${report.statusClass}">${report.status}</span>
+                    </div>
+                </div>
+                <div class="detail-description">
+                    ${report.description}
+                </div>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-item-label">Catégorie</span>
+                        <span class="detail-item-value">${report.category}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">Lieu</span>
+                        <span class="detail-item-value">${report.location}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">Déclarant</span>
+                        <span class="detail-item-value">${report.reporter}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">Signalement #</span>
+                        <span class="detail-item-value">${report.id}</span>
+                    </div>
+                </div>
+            `;
+            
+            openModal('report-detail-modal');
+        }
+    </script>
 </h:body>
 </html>

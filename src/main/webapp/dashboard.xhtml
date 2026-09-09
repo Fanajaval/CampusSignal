@@ -1,47 +1,236 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core">
-<h:head><title>CampusSignal - Tableau de bord</title><h:outputStylesheet library="css" name="app.css"/><h:outputScript library="js" name="toast.js" target="head"/></h:head>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core" xmlns:ui="jakarta.faces.facelets" xmlns:pt="jakarta.faces.passthrough">
+<h:head><title>CampusSignal - Tableau de bord</title><h:outputStylesheet library="css" name="app.css"/><h:outputScript library="js" name="toast.js" target="head"/><h:outputScript library="js" name="modal.js" target="head"/></h:head>
 <h:body>
     <header class="topbar">
         <div><span class="eyebrow">Espace étudiant</span><h1>Tableau de bord</h1></div>
         <div class="nav-actions">
             <h:link value="Tableau de bord" outcome="dashboard" styleClass="button button-nav-active"/>
             <h:link value="Mes signalements" outcome="my-reports" styleClass="button button-quiet"/>
-            <h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-quiet"/></h:form>
+            <h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-danger"/></h:form>
         </div>
     </header>
     <main class="page-shell">
-        <section class="intro">
-            <p class="eyebrow">Bienvenue</p>
-            <h2>Bonjour, #{reportBean.reporter}.</h2>
-            <p class="muted">Voici un aperçu de vos signalements.</p>
+        <!-- Welcome Section -->
+        <section class="dashboard-welcome">
+            <div>
+                <h2>Bonjour, #{authBean.currentUser.displayName}</h2>
+                <p class="muted">Voici un aperçu de vos signalements.</p>
+            </div>
+            <button type="button" onclick="openModal('create-report-modal')" class="button button-primary">
+                Nouveau signalement
+            </button>
         </section>
+
+        <!-- Statistics Cards -->
         <section class="stats-grid">
             <article class="stat-card stat-yellow">
-                <span class="stat-label">Signalés</span>
-                <strong>#{reportBean.signaleCount}</strong>
+                <div class="stat-content">
+                    <span class="stat-label">Signalés</span>
+                    <strong class="stat-number">#{reportBean.signaleCount}</strong>
+                </div>
             </article>
             <article class="stat-card stat-blue">
-                <span class="stat-label">Reçus</span>
-                <strong>#{reportBean.recuCount}</strong>
+                <div class="stat-content">
+                    <span class="stat-label">Reçus</span>
+                    <strong class="stat-number">#{reportBean.recuCount}</strong>
+                </div>
             </article>
             <article class="stat-card stat-green">
-                <span class="stat-label">Résolus</span>
-                <strong>#{reportBean.resoluCount}</strong>
+                <div class="stat-content">
+                    <span class="stat-label">Résolus</span>
+                    <strong class="stat-number">#{reportBean.resoluCount}</strong>
+                </div>
             </article>
         </section>
-        <section class="content-section">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">Accès rapide</p>
-                    <h2>Actions</h2>
+
+        <!-- Recent Reports -->
+        <h:panelGroup rendered="#{not empty reportBean.myReports}">
+            <section class="content-section">
+                <div class="section-heading">
+                    <h2>Activité récente</h2>
+                    <h:link value="Voir tout" outcome="my-reports" styleClass="dashboard-card-link"/>
+                </div>
+                <div class="report-list" style="margin-top: 1.5rem;">
+                    <ui:repeat value="#{reportBean.myReports}" var="report" end="2">
+                        <article class="report-row">
+                            <div class="report-marker"></div>
+                            <div class="report-main">
+                                <div class="report-title-line">
+                                    <h3>#{report.title}</h3>
+                                    <span class="status status-#{report.status}">#{report.status.label}</span>
+                                </div>
+                                <p>#{report.description}</p>
+                                <div class="report-meta">
+                                    <span>#{report.category.label}</span>
+                                    <span>#{report.location}</span>
+                                    <a href="#" onclick="openReportDetail(#{report.id}); return false;" class="report-link">
+                                        Voir les détails
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    </ui:repeat>
+                </div>
+            </section>
+        </h:panelGroup>
+
+        <!-- Empty State -->
+        <h:panelGroup rendered="#{empty reportBean.myReports}">
+            <section class="empty-state-section">
+                <div class="empty-state-large">
+                    <strong>Aucun signalement pour le moment</strong>
+                    <span>Commencez par créer votre premier signalement.</span>
+                    <button type="button" onclick="openModal('create-report-modal')" class="button button-primary" style="margin-top: 1rem;">
+                        Créer un signalement
+                    </button>
+                </div>
+            </section>
+        </h:panelGroup>
+    </main>
+    
+    <!-- Modal backdrop -->
+    <div id="modal-backdrop" class="modal-backdrop"></div>
+    
+    <!-- Create Report Modal -->
+    <div id="create-report-modal" class="modal-container">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Nouveau signalement</h2>
+                <button type="button" class="modal-close" onclick="closeModal('create-report-modal')" aria-label="Fermer">×</button>
+            </div>
+            
+            <h:form id="reportForm">
+                <div class="modal-body">
+                    <p class="muted" style="margin-bottom: 1.5rem;">Décrivez le problème pour permettre une intervention rapide.</p>
+                    
+                    <h:messages styleClass="messages"/>
+                    
+                    <div style="display: grid; gap: 1.25rem;">
+                        <div class="field">
+                            <h:outputLabel for="title" value="Titre"/>
+                            <h:inputText id="title" value="#{reportBean.title}" required="true" 
+                                requiredMessage="Le titre est obligatoire." 
+                                pt:placeholder="Ex. : Fuite d'eau au premier étage"/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="category" value="Catégorie"/>
+                            <h:selectOneMenu id="category" value="#{reportBean.category}" required="true" 
+                                requiredMessage="La catégorie est obligatoire.">
+                                <f:selectItem itemLabel="Sélectionner une catégorie" noSelectionOption="true"/>
+                                <f:selectItems value="#{reportBean.categories}" var="item" 
+                                    itemValue="#{item}" itemLabel="#{item.label}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="location" value="Lieu"/>
+                            <h:inputText id="location" value="#{reportBean.location}" required="true" 
+                                requiredMessage="Le lieu est obligatoire." 
+                                pt:placeholder="Ex. : Bâtiment A, salle 204"/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="reporter" value="Étudiant connecté"/>
+                            <h:inputText id="reporter" value="#{reportBean.reporter}" readonly="true" 
+                                pt:placeholder="Votre compte étudiant"/>
+                            <span class="field-hint">Votre signalement sera associé à votre compte.</span>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="description" value="Description"/>
+                            <h:inputTextarea id="description" value="#{reportBean.description}" rows="4" 
+                                required="true" requiredMessage="La description est obligatoire." 
+                                pt:placeholder="Ex. : L'eau coule depuis ce matin et le sol devient glissant."/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('create-report-modal')" 
+                        class="button button-quiet">Annuler</button>
+                    <h:commandButton value="Envoyer le signalement" 
+                        action="#{reportBean.createReport}" 
+                        styleClass="button button-primary"
+                        onclick="setTimeout(() => closeModal('create-report-modal'), 100)"/>
+                </div>
+            </h:form>
+        </div>
+    </div>
+    
+    <!-- Report Detail Modal -->
+    <div id="report-detail-modal" class="modal-container">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Détails du signalement</h2>
+                <button type="button" class="modal-close" onclick="closeModal('report-detail-modal')" aria-label="Fermer">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="report-detail-content" class="detail-panel">
+                    <!-- Content loaded dynamically -->
                 </div>
             </div>
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                <h:link value="Créer un signalement" outcome="create-report" styleClass="button button-primary"/>
-                <h:link value="Voir tous mes signalements" outcome="my-reports" styleClass="button button-quiet"/>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal('report-detail-modal')" class="button button-quiet">Fermer</button>
             </div>
-        </section>
-    </main>
+        </div>
+    </div>
+    
+    <script>
+        function openReportDetail(reportId) {
+            // Get report data from the page
+            const reports = [
+                <ui:repeat value="#{reportBean.myReports}" var="r" varStatus="status">
+                    {
+                        id: #{r.id},
+                        title: "#{r.title}",
+                        description: "#{r.description}",
+                        category: "#{r.category.label}",
+                        location: "#{r.location}",
+                        reporter: "#{r.reporter}",
+                        status: "#{r.status.label}",
+                        statusClass: "#{r.status}"
+                    }#{not status.last ? ',' : ''}
+                </ui:repeat>
+            ];
+            
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            const content = document.getElementById('report-detail-content');
+            content.innerHTML = `
+                <div class="detail-header">
+                    <div class="detail-header-content">
+                        <h2>${report.title}</h2>
+                        <span class="status status-${report.statusClass}">${report.status}</span>
+                    </div>
+                </div>
+                <div class="detail-description">
+                    ${report.description}
+                </div>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-item-label">Catégorie</span>
+                        <span class="detail-item-value">${report.category}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">Lieu</span>
+                        <span class="detail-item-value">${report.location}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">Déclarant</span>
+                        <span class="detail-item-value">${report.reporter}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">Signalement #</span>
+                        <span class="detail-item-value">${report.id}</span>
+                    </div>
+                </div>
+            `;
+            
+            openModal('report-detail-modal');
+        }
+    </script>
 </h:body>
 </html>

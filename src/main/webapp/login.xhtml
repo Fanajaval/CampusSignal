@@ -18,7 +18,7 @@
                 <div class="field"><h:outputLabel for="email" value="Adresse email"/><h:inputText id="email" value="#{loginBean.email}" required="true" requiredMessage="L'email est obligatoire." autocomplete="email"/></div>
                 <div class="field"><div class="field-label-row"><h:outputLabel for="password" value="Mot de passe"/><span class="field-hint">Votre accès CampusSignal</span></div><h:inputSecret id="password" value="#{loginBean.password}" required="true" requiredMessage="Le mot de passe est obligatoire." autocomplete="current-password"/></div>
                 <h:commandButton value="Se connecter" action="#{loginBean.login}" styleClass="button button-primary form-submit"/>
-            </h:form>
+            </h:form>+
             <p class="auth-link">Pas encore de compte ? <h:link value="Créer un compte étudiant" outcome="register"/></p>
             <div class="demo-access"><strong>Accès de démonstration</strong><span><b>Étudiant</b> student@campus.local · student123</span><span><b>Responsable</b> admin@campus.local · admin123</span></div>
         </section>
