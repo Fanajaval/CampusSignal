@@ -13,6 +13,8 @@ public class Report {
     private LocalDateTime createdAt;
     private boolean updated;
     private LocalDateTime updatedAt;
+    private LocalDateTime receivedAt;
+    private LocalDateTime resolvedAt;
 
     public Report() {
     }
@@ -29,6 +31,8 @@ public class Report {
         this.createdAt = createdAt;
         this.updated = false;
         this.updatedAt = null;
+        this.receivedAt = null;
+        this.resolvedAt = null;
     }
 
     public long getId() { return id; }
@@ -51,4 +55,8 @@ public class Report {
     public void setUpdated(boolean updated) { this.updated = updated; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDateTime getReceivedAt() { return receivedAt; }
+    public void setReceivedAt(LocalDateTime receivedAt) { this.receivedAt = receivedAt; }
+    public LocalDateTime getResolvedAt() { return resolvedAt; }
+    public void setResolvedAt(LocalDateTime resolvedAt) { this.resolvedAt = resolvedAt; }
 }

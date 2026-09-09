@@ -37,7 +37,7 @@ public class AuthFilter implements Filter {
             httpResponse.sendRedirect(httpRequest.getContextPath() + "/dashboard.xhtml");
             return;
         }
-        if ((path.equals("/student.xhtml") || path.equals("/dashboard.xhtml") || path.equals("/my-reports.xhtml")) 
+        if ((path.equals("/student.xhtml") || path.equals("/dashboard.xhtml") || path.equals("/my-reports.xhtml") || path.equals("/profil.xhtml")) 
             && user.getRole() != UserRole.ETUDIANT) {
             httpResponse.sendRedirect(httpRequest.getContextPath() + "/admin.xhtml");
             return;

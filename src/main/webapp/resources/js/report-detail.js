@@ -24,7 +24,12 @@ function openReportDetailFromElement(element) {
         location: reportRow.getAttribute('data-report-location'),
         reporter: reportRow.getAttribute('data-report-reporter'),
         status: reportRow.getAttribute('data-report-status'),
-        statusClass: reportRow.getAttribute('data-report-status-class')
+        statusClass: reportRow.getAttribute('data-report-status-class'),
+        updated: reportRow.getAttribute('data-report-updated') === 'true',
+        createdAt: reportRow.getAttribute('data-report-created-at'),
+        updatedAt: reportRow.getAttribute('data-report-updated-at'),
+        receivedAt: reportRow.getAttribute('data-report-received-at'),
+        resolvedAt: reportRow.getAttribute('data-report-resolved-at')
     };
     
     // Affichage de la modal
@@ -52,7 +57,12 @@ function openReportDetail(reportId) {
         location: reportRow.getAttribute('data-report-location'),
         reporter: reportRow.getAttribute('data-report-reporter'),
         status: reportRow.getAttribute('data-report-status'),
-        statusClass: reportRow.getAttribute('data-report-status-class')
+        statusClass: reportRow.getAttribute('data-report-status-class'),
+        updated: reportRow.getAttribute('data-report-updated') === 'true',
+        createdAt: reportRow.getAttribute('data-report-created-at'),
+        updatedAt: reportRow.getAttribute('data-report-updated-at'),
+        receivedAt: reportRow.getAttribute('data-report-received-at'),
+        resolvedAt: reportRow.getAttribute('data-report-resolved-at')
     };
     
     // Affichage de la modal
@@ -102,6 +112,56 @@ function displayReportDetail(report) {
     html += '<span class="detail-item-value">' + report.id + '</span>';
     html += '</div>';
     
+    html += '</div>';
+    
+    // Historique / Chronologie
+    html += '<div class="detail-history-section">';
+    html += '<p class="eyebrow" style="margin-bottom: 0.75rem;">Historique</p>';
+    html += '<div class="report-history">';
+    
+    // Créé
+    html += '<div class="history-item history-created">';
+    html += '<span class="history-dot"></span>';
+    html += '<div class="history-content">';
+    html += '<span class="history-label">Créé</span>';
+    html += '<span class="history-date">' + escapeHtml(report.createdAt || '—') + '</span>';
+    html += '</div>';
+    html += '</div>';
+    
+    // Modifié
+    if (report.updated && report.updatedAt && report.updatedAt !== '—') {
+        html += '<div class="history-item history-updated">';
+        html += '<span class="history-dot"></span>';
+        html += '<div class="history-content">';
+        html += '<span class="history-label">Modifié par l\'étudiant</span>';
+        html += '<span class="history-date">' + escapeHtml(report.updatedAt) + '</span>';
+        html += '</div>';
+        html += '</div>';
+    }
+    
+    // Reçu
+    if (report.receivedAt && report.receivedAt !== '—') {
+        html += '<div class="history-item history-received">';
+        html += '<span class="history-dot"></span>';
+        html += '<div class="history-content">';
+        html += '<span class="history-label">Marqué « Reçu » par l\'administration</span>';
+        html += '<span class="history-date">' + escapeHtml(report.receivedAt) + '</span>';
+        html += '</div>';
+        html += '</div>';
+    }
+    
+    // Résolu
+    if (report.resolvedAt && report.resolvedAt !== '—') {
+        html += '<div class="history-item history-resolved">';
+        html += '<span class="history-dot"></span>';
+        html += '<div class="history-content">';
+        html += '<span class="history-label">Résolu</span>';
+        html += '<span class="history-date">' + escapeHtml(report.resolvedAt) + '</span>';
+        html += '</div>';
+        html += '</div>';
+    }
+    
+    html += '</div>';
     html += '</div>';
     
     content.innerHTML = html;

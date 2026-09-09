@@ -13,6 +13,8 @@ import org.example.model.UserRole;
 import org.example.service.ReportService;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Named("reportBean")
@@ -215,5 +217,14 @@ public class ReportBean {
             return;
         }
         reportService.updateStatus(id, status);
+    }
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm");
+
+    public String formatDateTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "—";
+        }
+        return dateTime.format(DATE_FORMATTER);
     }
 }

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:pt="jakarta.faces.passthrough">
+<h:head>
+    <title>CampusSignal - Mon profil</title>
+    <h:outputStylesheet library="css" name="app.css"/>
+    <h:outputScript library="js" name="toast.js" target="head"/>
+</h:head>
+<h:body>
+    <header class="topbar">
+        <div>
+            <span class="eyebrow">Espace étudiant</span>
+            <h1>Mon profil</h1>
+        </div>
+        <div class="nav-actions">
+            <h:link value="Tableau de bord" outcome="dashboard" styleClass="button button-quiet"/>
+            <h:link value="Mes signalements" outcome="my-reports" styleClass="button button-quiet"/>
+            <h:link value="Mon profil" outcome="profil" styleClass="button button-nav-active"/>
+            <h:form>
+                <h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-danger"/>
+            </h:form>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="content-section profile-page">
+            <div class="profile-header-card">
+                <div class="profile-avatar">
+                    <h:outputText value="#{authBean.currentUser.displayName ne null ? authBean.currentUser.displayName.substring(0,1).toUpperCase() : 'E'}"/>
+                </div>
+                <div class="profile-identity">
+                    <h2>#{authBean.currentUser.displayName}</h2>
+                    <p class="muted">#{authBean.currentUser.institution.label} · #{authBean.currentUser.studyLevel.label} · Matricule #{authBean.currentUser.studentNumber}</p>
+                    <span class="status status-active">Compte actif</span>
+                </div>
+                <div class="profile-contact">
+                    <div class="profile-contact-item">
+                        <span class="profile-contact-label">Email</span>
+                        <span class="profile-contact-value">#{authBean.currentUser.email}</span>
+                    </div>
+                </div>
+            </div>
+
+            <h:form id="profileForm">
+                <h:messages styleClass="messages"/>
+                <div class="form-card">
+                    <div class="form-card-heading">
+                        <p class="eyebrow">Informations personnelles</p>
+                        <h2>Modifier mes informations</h2>
+                        <p class="muted">Mettez à jour vos coordonnées et votre cursus. Ces informations seront utilisées sur vos signalements.</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field">
+                            <h:outputLabel for="displayName" value="Nom complet"/>
+                            <h:inputText id="displayName" value="#{profilBean.displayName}" required="true"
+                                requiredMessage="Le nom complet est obligatoire."
+                                pt:placeholder="Ex. : Rakoto Jean Noël"/>
+                        </div>
+
+                        <div class="field">
+                            <h:outputLabel for="email" value="Adresse email"/>
+                            <h:inputText id="email" value="#{profilBean.email}" required="true"
+                                requiredMessage="L'adresse email est obligatoire."
+                                pt:placeholder="exemple@campus.mg"/>
+                        </div>
+
+                        <div class="field">
+                            <h:outputLabel for="institution" value="École ou Faculté"/>
+                            <h:selectOneMenu id="institution" value="#{profilBean.institution}" required="true"
+                                requiredMessage="L'établissement est obligatoire.">
+                                <f:selectItem itemLabel="Sélectionner votre établissement" noSelectionOption="true"/>
+                                <f:selectItems value="#{profilBean.institutions}" var="inst"
+                                    itemValue="#{inst}" itemLabel="#{inst.label}"/>
+                            </h:selectOneMenu>
+                        </div>
+
+                        <div class="field">
+                            <h:outputLabel for="studyLevel" value="Niveau d'étude"/>
+                            <h:selectOneMenu id="studyLevel" value="#{profilBean.studyLevel}" required="true"
+                                requiredMessage="Le niveau d'étude est obligatoire.">
+                                <f:selectItem itemLabel="Sélectionner votre niveau" noSelectionOption="true"/>
+                                <f:selectItems value="#{profilBean.levels}" var="lvl"
+                                    itemValue="#{lvl}" itemLabel="#{lvl.label}"/>
+                            </h:selectOneMenu>
+                        </div>
+
+                        <div class="field" style="grid-column: 1 / -1;">
+                            <h:outputLabel for="studentNumber" value="Numéro matricule"/>
+                            <h:inputText id="studentNumber" value="#{profilBean.studentNumber}" required="true"
+                                requiredMessage="Le matricule est obligatoire."/>
+                            <span class="field-hint">Ce champ est prérempli avec votre matricule officiel. Vous pouvez le corriger si nécessaire.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="form-card-heading">
+                        <p class="eyebrow">Sécurité</p>
+                        <h2>Modifier mon mot de passe</h2>
+                        <p class="muted">Laissez ces champs vides si vous ne souhaitez pas changer de mot de passe.</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field" style="grid-column: 1 / -1;">
+                            <h:outputLabel for="currentPassword" value="Mot de passe actuel"/>
+                            <h:inputSecret id="currentPassword" value="#{profilBean.currentPassword}"
+                                pt:placeholder="Laissez vide si vous ne changez pas de mot de passe"/>
+                        </div>
+
+                        <div class="field">
+                            <h:outputLabel for="newPassword" value="Nouveau mot de passe"/>
+                            <h:inputSecret id="newPassword" value="#{profilBean.newPassword}"
+                                pt:placeholder="8 caractères minimum"/>
+                            <span class="field-hint">Requis pour changer votre mot de passe.</span>
+                        </div>
+
+                        <div class="field">
+                            <h:outputLabel for="confirmNewPassword" value="Confirmer le nouveau mot de passe"/>
+                            <h:inputSecret id="confirmNewPassword" value="#{profilBean.confirmNewPassword}"
+                                pt:placeholder="8 caractères minimum"/>
+                            <span class="field-hint">Doit correspondre exactement au nouveau mot de passe.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions-bar">
+                    <div class="form-actions-info muted">
+                        Les modifications sont enregistrées immédiatement.
+                    </div>
+                    <div class="form-actions-buttons">
+                        <h:commandButton value="Enregistrer les modifications"
+                            action="#{profilBean.save}"
+                            styleClass="button button-primary">
+                        </h:commandButton>
+                    </div>
+                </div>
+            </h:form>
+        </section>
+    </main>
+</h:body>
+</html>

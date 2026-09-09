@@ -29,7 +29,36 @@
         <h:panelGroup layout="block" styleClass="report-updated-badge" rendered="#{report.updated}">
             <span class="badge badge-updated">Modifié</span>
         </h:panelGroup>
-    </h3></div><span class="status status-#{report.status}">#{report.status.label}</span></div><p>#{report.description}</p><div class="report-meta"><span>#{report.category.label}</span><span>#{report.location}</span><span>#{report.reporter}</span><h:link value="Détails" outcome="report-details"><f:param name="id" value="#{report.id}"/></h:link></div><div class="inline-status"><h:selectOneMenu value="#{report.status}"><f:selectItems value="#{reportBean.statuses}" var="status" itemValue="#{status}" itemLabel="#{status.label}"/></h:selectOneMenu><h:commandButton value="Enregistrer le statut" action="#{reportBean.updateStatus(report.id, report.status)}" styleClass="button button-small"/></div></div></article></ui:repeat></div>
+    </h3></div><span class="status status-#{report.status}">#{report.status.label}</span></div><p>#{report.description}</p><div class="report-meta"><span>#{report.category.label}</span><span>#{report.location}</span><span>#{report.reporter}</span><h:link value="Détails" outcome="report-details"><f:param name="id" value="#{report.id}"/></h:link></div><div class="report-history">
+                                <div class="history-item history-created">
+                                    <span class="history-dot"></span>
+                                    <div class="history-content">
+                                        <span class="history-label">Créé</span>
+                                        <span class="history-date">#{reportBean.formatDateTime(report.createdAt)}</span>
+                                    </div>
+                                </div>
+                                <h:panelGroup layout="block" styleClass="history-item history-updated" rendered="#{report.updated and report.updatedAt ne null}">
+                                    <span class="history-dot"></span>
+                                    <div class="history-content">
+                                        <span class="history-label">Modifié par l'étudiant</span>
+                                        <span class="history-date">#{reportBean.formatDateTime(report.updatedAt)}</span>
+                                    </div>
+                                </h:panelGroup>
+                                <h:panelGroup layout="block" styleClass="history-item history-received" rendered="#{report.receivedAt ne null}">
+                                    <span class="history-dot"></span>
+                                    <div class="history-content">
+                                        <span class="history-label">Statut passé à « Reçu »</span>
+                                        <span class="history-date">#{reportBean.formatDateTime(report.receivedAt)}</span>
+                                    </div>
+                                </h:panelGroup>
+                                <h:panelGroup layout="block" styleClass="history-item history-resolved" rendered="#{report.resolvedAt ne null}">
+                                    <span class="history-dot"></span>
+                                    <div class="history-content">
+                                        <span class="history-label">Statut passé à « Résolu »</span>
+                                        <span class="history-date">#{reportBean.formatDateTime(report.resolvedAt)}</span>
+                                    </div>
+                                </h:panelGroup>
+                            </div><div class="inline-status"><h:selectOneMenu value="#{report.status}"><f:selectItems value="#{reportBean.statuses}" var="status" itemValue="#{status}" itemLabel="#{status.label}"/></h:selectOneMenu><h:commandButton value="Enregistrer le statut" action="#{reportBean.updateStatus(report.id, report.status)}" styleClass="button button-small"/></div></div></article></ui:repeat></div>
 <div id="adminNoResults" class="empty-state-large" style="display: none;">
     <strong>Aucun résultat trouvé</strong>
     <span>Essayez avec d'autres mots-clés ou filtres.</span>

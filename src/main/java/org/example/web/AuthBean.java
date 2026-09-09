@@ -19,6 +19,11 @@ public class AuthBean implements Serializable {
         jakarta.faces.context.FacesContext.getCurrentInstance()
                 .getExternalContext().getSessionMap().put("currentUser", user);
     }
+    public void setCurrentUser(User user) {
+        currentUser = user;
+        jakarta.faces.context.FacesContext.getCurrentInstance()
+                .getExternalContext().getSessionMap().put("currentUser", user);
+    }
 
     public void logout() throws IOException {
         currentUser = null;

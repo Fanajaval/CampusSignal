@@ -133,6 +133,66 @@ public class UserService {
             .orElse(null);
     }
 
+    public synchronized void updateOwnProfile(String currentEmail, String newEmail, String displayName,
+                                              Institution institution, String studentNumber,
+                                              StudyLevel studyLevel,
+                                              String currentPassword, String newPassword,
+                                              String confirmNewPassword) {
+        String normalizedCurrent = normalizeEmail(currentEmail);
+        User user = users.stream()
+                .filter(u -> u.getEmail().equals(normalizedCurrent))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Compte introuvable."));
+
+        if (displayName == null || displayName.trim().length() < 2) {
+            throw new IllegalArgumentException("Le nom complet est obligatoire.");
+        }
+        if (newEmail == null || !newEmail.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalArgumentException("L'adresse email est invalide.");
+        }
+        if (institution == null) {
+            throw new IllegalArgumentException("L'école ou la faculté est obligatoire.");
+        }
+        if (studentNumber == null || !studentNumber.trim().matches("^[A-Za-z0-9][A-Za-z0-9./-]{2,29}$")) {
+            throw new IllegalArgumentException("Le matricule est invalide.");
+        }
+        if (studyLevel == null) {
+            throw new IllegalArgumentException("Le niveau d'étude est obligatoire.");
+        }
+
+        String normalizedNewEmail = normalizeEmail(newEmail);
+        if (!normalizedNewEmail.equals(normalizedCurrent)) {
+            User existing = findUserByEmail(normalizedNewEmail);
+            if (existing != null) {
+                throw new IllegalArgumentException("Cette adresse email est déjà utilisée par un autre compte.");
+            }
+        }
+
+        boolean passwordChangeRequested = (newPassword != null && !newPassword.isEmpty())
+                || (confirmNewPassword != null && !confirmNewPassword.isEmpty());
+        if (passwordChangeRequested) {
+            if (currentPassword == null || currentPassword.isEmpty()) {
+                throw new IllegalArgumentException("Mot de passe actuel requis pour modifier votre mot de passe.");
+            }
+            if (!currentPassword.equals(user.getPassword())) {
+                throw new IllegalArgumentException("Mot de passe actuel incorrect.");
+            }
+            if (newPassword == null || newPassword.length() < 8) {
+                throw new IllegalArgumentException("Le nouveau mot de passe doit contenir au moins 8 caractères.");
+            }
+            if (!newPassword.equals(confirmNewPassword)) {
+                throw new IllegalArgumentException("Les nouveaux mots de passe ne correspondent pas.");
+            }
+            user.setPassword(newPassword);
+        }
+
+        user.setEmail(normalizedNewEmail);
+        user.setDisplayName(displayName.trim());
+        user.setInstitution(institution);
+        user.setStudentNumber(studentNumber.trim());
+        user.setStudyLevel(studyLevel);
+    }
+
     private User findPending(String email) {
         if (email == null) {
             return null;

@@ -21,7 +21,7 @@ public class ReportService {
                 "Batiment B - Rez-de-chaussee", "student@campus.local", ReportCategory.EAU);
         Report report = addReport("Ordinateur en panne", "Le poste ne demarre plus.",
                 "Bibliotheque", "student@campus.local", ReportCategory.INFORMATIQUE);
-        report.setStatus(ReportStatus.RECU);
+        updateStatus(report.getId(), ReportStatus.RECU);
     }
 
     public synchronized List<Report> findAll() { return List.copyOf(reports); }
@@ -54,6 +54,13 @@ public class ReportService {
         Report report = findById(id);
         if (report != null && status != null) {
             report.setStatus(status);
+            LocalDateTime now = LocalDateTime.now();
+            if (status == ReportStatus.RECU) {
+                report.setReceivedAt(now);
+            }
+            if (status == ReportStatus.RESOLU) {
+                report.setResolvedAt(now);
+            }
         }
     }
 

@@ -7,6 +7,7 @@
         <div class="nav-actions">
             <h:link value="Tableau de bord" outcome="dashboard" styleClass="button button-quiet"/>
             <h:link value="Mes signalements" outcome="my-reports" styleClass="button button-nav-active"/>
+            <h:link value="Mon profil" outcome="profil" styleClass="button button-quiet"/>
             <h:form><h:commandButton value="Déconnexion" action="#{authBean.logout}" styleClass="button button-danger"/></h:form>
         </div>
     </header>
@@ -54,7 +55,11 @@
                         data-report-reporter="#{report.reporter}"
                         data-report-status="#{report.status.label}"
                         data-report-status-class="#{report.status}"
-                        data-report-updated="#{report.updated}">
+                        data-report-updated="#{report.updated}"
+                        data-report-created-at="#{reportBean.formatDateTime(report.createdAt)}"
+                        data-report-updated-at="#{reportBean.formatDateTime(report.updatedAt)}"
+                        data-report-received-at="#{reportBean.formatDateTime(report.receivedAt)}"
+                        data-report-resolved-at="#{reportBean.formatDateTime(report.resolvedAt)}">
                         <div class="report-marker"></div>
                         <div class="report-main">
                             <div class="report-title-line">
@@ -73,6 +78,36 @@
                                 <a href="#" onclick="openReportDetailFromElement(this); return false;" class="report-link">
                                     Voir les détails
                                 </a>
+                            </div>
+                            <div class="report-history">
+                                <div class="history-item history-created">
+                                    <span class="history-dot"></span>
+                                    <div class="history-content">
+                                        <span class="history-label">Créé</span>
+                                        <span class="history-date">#{reportBean.formatDateTime(report.createdAt)}</span>
+                                    </div>
+                                </div>
+                                <h:panelGroup layout="block" styleClass="history-item history-updated" rendered="#{report.updated and report.updatedAt ne null}">
+                                    <span class="history-dot"></span>
+                                    <div class="history-content">
+                                        <span class="history-label">Modifié par vous</span>
+                                        <span class="history-date">#{reportBean.formatDateTime(report.updatedAt)}</span>
+                                    </div>
+                                </h:panelGroup>
+                                <h:panelGroup layout="block" styleClass="history-item history-received" rendered="#{report.receivedAt ne null}">
+                                    <span class="history-dot"></span>
+                                    <div class="history-content">
+                                        <span class="history-label">Marqué « Reçu » par l'administration</span>
+                                        <span class="history-date">#{reportBean.formatDateTime(report.receivedAt)}</span>
+                                    </div>
+                                </h:panelGroup>
+                                <h:panelGroup layout="block" styleClass="history-item history-resolved" rendered="#{report.resolvedAt ne null}">
+                                    <span class="history-dot"></span>
+                                    <div class="history-content">
+                                        <span class="history-label">Résolu</span>
+                                        <span class="history-date">#{reportBean.formatDateTime(report.resolvedAt)}</span>
+                                    </div>
+                                </h:panelGroup>
                             </div>
                             <h:panelGroup layout="block" styleClass="report-actions-row" rendered="#{reportBean.isReportEditable(report)}">
                                 <h:commandButton value="Modifier" action="#{reportBean.prepareEdit(report.id)}"
