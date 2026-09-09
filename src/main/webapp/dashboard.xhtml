@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core" xmlns:ui="jakarta.faces.facelets" xmlns:pt="jakarta.faces.passthrough">
-<h:head><title>CampusSignal - Tableau de bord</title><h:outputStylesheet library="css" name="app.css"/><h:outputScript library="js" name="toast.js" target="head"/><h:outputScript library="js" name="modal.js" target="head"/></h:head>
+<h:head><title>CampusSignal - Tableau de bord</title><h:outputStylesheet library="css" name="app.css"/><h:outputScript library="js" name="toast.js" target="head"/><h:outputScript library="js" name="modal.js" target="head"/><h:outputScript library="js" name="report-detail.js" target="head"/></h:head>
 <h:body>
     <header class="topbar">
         <div><span class="eyebrow">Espace étudiant</span><h1>Tableau de bord</h1></div>
@@ -53,7 +53,15 @@
                 </div>
                 <div class="report-list" style="margin-top: 1.5rem;">
                     <ui:repeat value="#{reportBean.myReports}" var="report" end="2">
-                        <article class="report-row">
+                        <article class="report-row"
+                            data-report-id="#{report.id}"
+                            data-report-title="#{report.title}"
+                            data-report-description="#{report.description}"
+                            data-report-category="#{report.category.label}"
+                            data-report-location="#{report.location}"
+                            data-report-reporter="#{report.reporter}"
+                            data-report-status="#{report.status.label}"
+                            data-report-status-class="#{report.status}">
                             <div class="report-marker"></div>
                             <div class="report-main">
                                 <div class="report-title-line">
@@ -64,7 +72,7 @@
                                 <div class="report-meta">
                                     <span>#{report.category.label}</span>
                                     <span>#{report.location}</span>
-                                    <a href="#" onclick="openReportDetail(#{report.id}); return false;" class="report-link">
+                                    <a href="#" onclick="openReportDetailFromElement(this); return false;" class="report-link">
                                         Voir les détails
                                     </a>
                                 </div>
@@ -176,61 +184,5 @@
             </div>
         </div>
     </div>
-    
-    <script>
-        function openReportDetail(reportId) {
-            // Get report data from the page
-            const reports = [
-                <ui:repeat value="#{reportBean.myReports}" var="r" varStatus="status">
-                    {
-                        id: #{r.id},
-                        title: "#{r.title}",
-                        description: "#{r.description}",
-                        category: "#{r.category.label}",
-                        location: "#{r.location}",
-                        reporter: "#{r.reporter}",
-                        status: "#{r.status.label}",
-                        statusClass: "#{r.status}"
-                    }#{not status.last ? ',' : ''}
-                </ui:repeat>
-            ];
-            
-            const report = reports.find(r => r.id === reportId);
-            if (!report) return;
-            
-            const content = document.getElementById('report-detail-content');
-            content.innerHTML = `
-                <div class="detail-header">
-                    <div class="detail-header-content">
-                        <h2>${report.title}</h2>
-                        <span class="status status-${report.statusClass}">${report.status}</span>
-                    </div>
-                </div>
-                <div class="detail-description">
-                    ${report.description}
-                </div>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <span class="detail-item-label">Catégorie</span>
-                        <span class="detail-item-value">${report.category}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-item-label">Lieu</span>
-                        <span class="detail-item-value">${report.location}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-item-label">Déclarant</span>
-                        <span class="detail-item-value">${report.reporter}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-item-label">Signalement #</span>
-                        <span class="detail-item-value">${report.id}</span>
-                    </div>
-                </div>
-            `;
-            
-            openModal('report-detail-modal');
-        }
-    </script>
 </h:body>
 </html>
