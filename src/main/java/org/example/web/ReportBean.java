@@ -31,6 +31,12 @@ public class ReportBean {
     private ReportStatus selectedStatus;
     private long selectedId;
 
+    private long editingId;
+    private String editTitle;
+    private String editDescription;
+    private String editLocation;
+    private ReportCategory editCategory;
+
     @Inject
     private AuthBean authBean;
 
@@ -72,16 +78,91 @@ public class ReportBean {
                             "Signalement impossible", exception.getMessage()));
             return;
         }
-        
-        // Clear form fields
+
         title = null;
         description = null;
         location = null;
         category = null;
-        
+
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO, "Signalement créé",
                         "Le signalement a bien été enregistré."));
+    }
+
+    private boolean canEditDeleteReport(Report report) {
+        if (report == null) return false;
+        if (authBean.getCurrentUser() == null || authBean.getCurrentUser().getRole() != UserRole.ETUDIANT) return false;
+        if (!report.getReporter().equalsIgnoreCase(authBean.getCurrentUser().getEmail())) return false;
+        return report.getStatus() == ReportStatus.SIGNALE;
+    }
+
+    public String prepareEdit(long reportId) {
+        Report report = reportService.findById(reportId);
+        if (!canEditDeleteReport(report)) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Action refusée", "Vous ne pouvez pas modifier ce signalement."));
+            return null;
+        }
+        this.editingId = reportId;
+        this.editTitle = report.getTitle();
+        this.editDescription = report.getDescription();
+        this.editLocation = report.getLocation();
+        this.editCategory = report.getCategory();
+        return null;
+    }
+
+    public String saveEdit() {
+        Report report = reportService.findById(editingId);
+        if (!canEditDeleteReport(report)) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Action refusée", "Vous ne pouvez pas modifier ce signalement."));
+            return null;
+        }
+        try {
+            reportService.updateReport(editingId, editTitle, editDescription, editLocation, editCategory);
+        } catch (IllegalArgumentException exception) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Modification impossible", exception.getMessage()));
+            return null;
+        }
+        editingId = 0;
+        editTitle = null;
+        editDescription = null;
+        editLocation = null;
+        editCategory = null;
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Signalement modifié",
+                        "Le signalement a bien été mis à jour."));
+        return null;
+    }
+
+    public String deleteReport(long reportId) {
+        Report report = reportService.findById(reportId);
+        if (!canEditDeleteReport(report)) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Action refusée", "Vous ne pouvez pas supprimer ce signalement."));
+            return null;
+        }
+        try {
+            reportService.deleteReport(reportId);
+        } catch (IllegalArgumentException exception) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                            "Suppression impossible", exception.getMessage()));
+            return null;
+        }
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Signalement supprimé",
+                        "Le signalement a bien été supprimé."));
+        return null;
+    }
+
+    public boolean isReportEditable(Report report) {
+        return canEditDeleteReport(report);
     }
 
     public String getTitle() { return title; }
@@ -107,6 +188,17 @@ public class ReportBean {
     public void setSelectedStatus(ReportStatus selectedStatus) { this.selectedStatus = selectedStatus; }
     public long getSelectedId() { return selectedId; }
     public void setSelectedId(long selectedId) { this.selectedId = selectedId; }
+
+    public long getEditingId() { return editingId; }
+    public void setEditingId(long editingId) { this.editingId = editingId; }
+    public String getEditTitle() { return editTitle; }
+    public void setEditTitle(String editTitle) { this.editTitle = editTitle; }
+    public String getEditDescription() { return editDescription; }
+    public void setEditDescription(String editDescription) { this.editDescription = editDescription; }
+    public String getEditLocation() { return editLocation; }
+    public void setEditLocation(String editLocation) { this.editLocation = editLocation; }
+    public ReportCategory getEditCategory() { return editCategory; }
+    public void setEditCategory(ReportCategory editCategory) { this.editCategory = editCategory; }
 
     public void saveStatus() {
         reportService.updateStatus(selectedId, selectedStatus);

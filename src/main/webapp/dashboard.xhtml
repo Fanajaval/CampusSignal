@@ -45,7 +45,9 @@
         </section>
 
         <!-- Recent Reports -->
-        <h:panelGroup rendered="#{not empty reportBean.myReports}">
+        <h:panelGroup rendered="#{not empty reportBean.myReports}" layout="block">
+            <h:form id="dashForm">
+            <h:messages styleClass="messages"/>
             <section class="content-section">
                 <div class="section-heading">
                     <h2>Activité récente</h2>
@@ -61,11 +63,17 @@
                             data-report-location="#{report.location}"
                             data-report-reporter="#{report.reporter}"
                             data-report-status="#{report.status.label}"
-                            data-report-status-class="#{report.status}">
+                            data-report-status-class="#{report.status}"
+                            data-report-updated="#{report.updated}">
                             <div class="report-marker"></div>
                             <div class="report-main">
                                 <div class="report-title-line">
-                                    <h3>#{report.title}</h3>
+                                    <h3 style="display:inline-flex; align-items:center; gap:.5rem;">
+                                        #{report.title}
+                                        <h:panelGroup layout="block" styleClass="report-updated-badge" rendered="#{report.updated}">
+                                            <span class="badge badge-updated">Modifié</span>
+                                        </h:panelGroup>
+                                    </h3>
                                     <span class="status status-#{report.status}">#{report.status.label}</span>
                                 </div>
                                 <p>#{report.description}</p>
@@ -76,11 +84,24 @@
                                         Voir les détails
                                     </a>
                                 </div>
+                                <h:panelGroup layout="block" styleClass="report-actions-row" rendered="#{reportBean.isReportEditable(report)}">
+                                    <h:commandButton value="Modifier" action="#{reportBean.prepareEdit(report.id)}"
+                                        styleClass="button button-small button-edit-inline"
+                                        onclick="setTimeout(() => openModal('edit-report-modal'), 100); return false;">
+                                        <f:ajax execute="@form" render="@form :dashEditReportForm"/>
+                                    </h:commandButton>
+                                    <h:commandButton value="Supprimer" action="#{reportBean.deleteReport(report.id)}"
+                                        styleClass="button button-small button-delete-inline"
+                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce signalement ?');">
+                                        <f:ajax execute="@this" render="@form"/>
+                                    </h:commandButton>
+                                </h:panelGroup>
                             </div>
                         </article>
                     </ui:repeat>
                 </div>
             </section>
+            </h:form>
         </h:panelGroup>
 
         <!-- Empty State -->
@@ -167,6 +188,61 @@
         </div>
     </div>
     
+    <!-- Edit Report Modal (dashboard) -->
+    <div id="edit-report-modal" class="modal-container">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Modifier le signalement</h2>
+                <button type="button" class="modal-close" onclick="closeModal('edit-report-modal')" aria-label="Fermer">×</button>
+            </div>
+            <h:form id="dashEditReportForm">
+                <div class="modal-body">
+                    <p class="muted" style="margin-bottom: 1.5rem;">
+                        Modifiez les informations de votre signalement. Seuls les signalements au statut « Signalé » sont modifiables.
+                    </p>
+                    <h:messages styleClass="messages"/>
+                    <h:panelGroup layout="block" rendered="#{reportBean.editingId gt 0}">
+                        <div class="report-edit-id">Signalement n° #{reportBean.editingId}</div>
+                    </h:panelGroup>
+                    <div style="display: grid; gap: 1.25rem;">
+                        <div class="field">
+                            <h:outputLabel for="dashEditTitle" value="Titre"/>
+                            <h:inputText id="dashEditTitle" value="#{reportBean.editTitle}" required="true"
+                                requiredMessage="Le titre est obligatoire."/>
+                        </div>
+                        <div class="field">
+                            <h:outputLabel for="dashEditCategory" value="Catégorie"/>
+                            <h:selectOneMenu id="dashEditCategory" value="#{reportBean.editCategory}" required="true"
+                                requiredMessage="La catégorie est obligatoire.">
+                                <f:selectItem itemLabel="Sélectionner une catégorie" noSelectionOption="true"/>
+                                <f:selectItems value="#{reportBean.categories}" var="item"
+                                    itemValue="#{item}" itemLabel="#{item.label}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        <div class="field">
+                            <h:outputLabel for="dashEditLocation" value="Lieu"/>
+                            <h:inputText id="dashEditLocation" value="#{reportBean.editLocation}" required="true"
+                                requiredMessage="Le lieu est obligatoire."/>
+                        </div>
+                        <div class="field">
+                            <h:outputLabel for="dashEditDescription" value="Description"/>
+                            <h:inputTextarea id="dashEditDescription" value="#{reportBean.editDescription}" rows="4"
+                                required="true" requiredMessage="La description est obligatoire."/>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('edit-report-modal')" class="button button-quiet">Annuler</button>
+                    <h:commandButton value="Enregistrer les modifications" action="#{reportBean.saveEdit}"
+                        styleClass="button button-primary">
+                        <f:ajax execute="@form" render="@form :dashForm"
+                            onevent="function(data) { if (data.status === 'success') setTimeout(() => closeModal('edit-report-modal'), 100); }"/>
+                    </h:commandButton>
+                </div>
+            </h:form>
+        </div>
+    </div>
+
     <!-- Report Detail Modal -->
     <div id="report-detail-modal" class="modal-container">
         <div class="modal-dialog">

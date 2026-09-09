@@ -1,5 +1,6 @@
 package org.example.service;
 
+import org.example.model.Institution;
 import org.example.model.User;
 import org.example.model.StudyLevel;
 import org.junit.jupiter.api.Test;
@@ -16,11 +17,11 @@ class UserServiceTest {
         UserService service = new UserService();
 
         service.requestStudentRegistration("new.student@campus.local", "password123", "New Student",
-                "Faculté des Sciences", "2024-EST-015", StudyLevel.L1);
+                Institution.FACULTE_SCIENCES, "2024-EST-015", StudyLevel.L1);
 
         assertTrue(service.isPending("NEW.STUDENT@CAMPUS.LOCAL"));
         assertNull(service.authenticate("new.student@campus.local", "password123"));
-        assertEquals("Faculté des Sciences", service.findPendingStudents().get(0).getInstitution());
+        assertEquals(Institution.FACULTE_SCIENCES, service.findPendingStudents().get(0).getInstitution());
         assertEquals("2024-EST-015", service.findPendingStudents().get(0).getStudentNumber());
         assertEquals(StudyLevel.L1, service.findPendingStudents().get(0).getStudyLevel());
 
@@ -36,12 +37,12 @@ class UserServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> service.requestStudentRegistration("invalid", "password123", "Student",
-                    "Université", "2024-EST-016", StudyLevel.L1));
+                    Institution.FACULTE_SCIENCES, "2024-EST-016", StudyLevel.L1));
         assertThrows(IllegalArgumentException.class,
                 () -> service.requestStudentRegistration("student@campus.local", "password123", "Student",
-                    "Université", "2024-EST-017", StudyLevel.L2));
+                    Institution.ENS, "2024-EST-017", StudyLevel.L2));
         assertThrows(IllegalArgumentException.class,
                 () -> service.requestStudentRegistration("new@campus.local", "short", "Student",
-                    "Université", "2024-EST-018", StudyLevel.L3));
+                    Institution.FACULTE_SCIENCES, "2024-EST-018", StudyLevel.L3));
     }
 }

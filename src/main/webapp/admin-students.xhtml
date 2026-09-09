@@ -78,7 +78,7 @@
                                 </div>
                             </div>
                             <div class="table-cell">#{student.email}</div>
-                            <div class="table-cell">#{student.institution}</div>
+                            <div class="table-cell">#{student.institution.label}</div>
                             <div class="table-cell"><code class="student-code">#{student.studentNumber}</code></div>
                             <div class="table-cell">
                                 <span class="badge badge-level">#{student.studyLevel.label}</span>
@@ -147,10 +147,13 @@
                         </div>
                         
                         <div class="field">
-                            <h:outputLabel for="institution" value="École / Faculté"/>
-                            <h:inputText id="institution" value="#{studentAdminBean.institution}" required="true" 
-                                requiredMessage="L'école ou faculté est obligatoire." 
-                                pt:placeholder="Ex. : Faculté des Sciences"/>
+                            <h:outputLabel for="institution" value="École / Faculté / Institut"/>
+                            <h:selectOneMenu id="institution" value="#{studentAdminBean.institution}" required="true" 
+                                requiredMessage="L'école ou faculté est obligatoire.">
+                                <f:selectItem itemLabel="Sélectionner une institution" noSelectionOption="true"/>
+                                <f:selectItems value="#{studentAdminBean.institutions}" var="inst" 
+                                    itemValue="#{inst}" itemLabel="#{inst.label}"/>
+                            </h:selectOneMenu>
                         </div>
                         
                         <div class="field">
@@ -212,9 +215,12 @@
                         </div>
                         
                         <div class="field">
-                            <h:outputLabel for="editInstitution" value="École / Faculté"/>
-                            <h:inputText id="editInstitution" value="#{studentAdminBean.institution}" required="true" 
-                                requiredMessage="L'école ou faculté est obligatoire."/>
+                            <h:outputLabel for="editInstitution" value="École / Faculté / Institut"/>
+                            <h:selectOneMenu id="editInstitution" value="#{studentAdminBean.institution}" required="true" 
+                                requiredMessage="L'école ou faculté est obligatoire.">
+                                <f:selectItems value="#{studentAdminBean.institutions}" var="inst" 
+                                    itemValue="#{inst}" itemLabel="#{inst.label}"/>
+                            </h:selectOneMenu>
                         </div>
                         
                         <div class="field">

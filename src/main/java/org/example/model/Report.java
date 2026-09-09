@@ -11,6 +11,8 @@ public class Report {
     private ReportCategory category;
     private ReportStatus status;
     private LocalDateTime createdAt;
+    private boolean updated;
+    private LocalDateTime updatedAt;
 
     public Report() {
     }
@@ -25,6 +27,8 @@ public class Report {
         this.category = category;
         this.status = status;
         this.createdAt = createdAt;
+        this.updated = false;
+        this.updatedAt = null;
     }
 
     public long getId() { return id; }
@@ -43,4 +47,8 @@ public class Report {
     public void setStatus(ReportStatus status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public boolean isUpdated() { return updated; }
+    public void setUpdated(boolean updated) { this.updated = updated; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

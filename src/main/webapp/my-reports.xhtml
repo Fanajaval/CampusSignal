@@ -11,13 +11,14 @@
         </div>
     </header>
     <main class="page-shell">
+        <h:form id="myReportsForm">
+        <h:messages styleClass="messages"/>
         <section class="content-section">
             <div class="section-heading">
                 <h2>Mes demandes</h2>
                 <button type="button" onclick="openModal('create-report-modal')" class="button button-primary">Nouveau</button>
             </div>
             
-            <!-- Filter Bar -->
             <div class="filter-bar">
                 <input type="text" id="searchInput" placeholder="Rechercher par titre, lieu, catégorie..." oninput="filterReports()"/>
                 <select id="statusFilter" onchange="filterReports()">
@@ -31,7 +32,6 @@
                 </button>
             </div>
             
-            <!-- Results counter -->
             <div class="filter-results">
                 <span class="muted" id="resultsCount">#{reportBean.myReports.size()} signalement(s)</span>
             </div>
@@ -53,11 +53,17 @@
                         data-report-location="#{report.location}"
                         data-report-reporter="#{report.reporter}"
                         data-report-status="#{report.status.label}"
-                        data-report-status-class="#{report.status}">
+                        data-report-status-class="#{report.status}"
+                        data-report-updated="#{report.updated}">
                         <div class="report-marker"></div>
                         <div class="report-main">
                             <div class="report-title-line">
-                                <h3>#{report.title}</h3>
+                                <h3>
+                                    #{report.title}
+                                    <h:panelGroup layout="block" styleClass="report-updated-badge" rendered="#{report.updated}">
+                                        <span class="badge badge-updated">Modifié</span>
+                                    </h:panelGroup>
+                                </h3>
                                 <span class="status status-#{report.status}">#{report.status.label}</span>
                             </div>
                             <p>#{report.description}</p>
@@ -68,20 +74,31 @@
                                     Voir les détails
                                 </a>
                             </div>
+                            <h:panelGroup layout="block" styleClass="report-actions-row" rendered="#{reportBean.isReportEditable(report)}">
+                                <h:commandButton value="Modifier" action="#{reportBean.prepareEdit(report.id)}"
+                                    styleClass="button button-small button-edit-inline"
+                                    onclick="setTimeout(() => openModal('edit-report-modal'), 100); return false;">
+                                    <f:ajax execute="@form" render="@form :editReportForm"/>
+                                </h:commandButton>
+                                <h:commandButton value="Supprimer" action="#{reportBean.deleteReport(report.id)}"
+                                    styleClass="button button-small button-delete-inline"
+                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce signalement ?');">
+                                    <f:ajax execute="@this" render="@form"/>
+                                </h:commandButton>
+                            </h:panelGroup>
                         </div>
                     </article>
                 </ui:repeat>
             </div>
             
-            <!-- No results message -->
             <div id="noResults" class="empty-state-large" style="display: none;">
                 <strong>Aucun résultat trouvé</strong>
                 <span>Essayez avec d'autres mots-clés ou filtres.</span>
             </div>
         </section>
+        </h:form>
     </main>
     
-    <!-- Modal backdrop -->
     <div id="modal-backdrop" class="modal-backdrop"></div>
     
     <!-- Create Report Modal -->
@@ -144,8 +161,75 @@
                         class="button button-quiet">Annuler</button>
                     <h:commandButton value="Envoyer le signalement" 
                         action="#{reportBean.createReport}" 
-                        styleClass="button button-primary"
-                        onclick="setTimeout(() => closeModal('create-report-modal'), 100)"/>
+                        styleClass="button button-primary">
+                        <f:ajax execute="@form" render="@form :myReportsForm @form"
+                            onevent="function(data) { if (data.status === 'success') setTimeout(() => closeModal('create-report-modal'), 100); }"/>
+                    </h:commandButton>
+                </div>
+            </h:form>
+        </div>
+    </div>
+    
+    <!-- Edit Report Modal -->
+    <div id="edit-report-modal" class="modal-container">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>Modifier le signalement</h2>
+                <button type="button" class="modal-close" onclick="closeModal('edit-report-modal')" aria-label="Fermer">×</button>
+            </div>
+            
+            <h:form id="editReportForm">
+                <div class="modal-body">
+                    <p class="muted" style="margin-bottom: 1.5rem;">
+                        Modifiez les informations de votre signalement. Seuls les signalements au statut « Signalé » sont modifiables.
+                    </p>
+                    
+                    <h:messages styleClass="messages"/>
+                    
+                    <h:panelGroup layout="block" rendered="#{reportBean.editingId gt 0}">
+                        <div class="report-edit-id">Signalement n° #{reportBean.editingId}</div>
+                    </h:panelGroup>
+                    
+                    <div style="display: grid; gap: 1.25rem;">
+                        <div class="field">
+                            <h:outputLabel for="editTitle" value="Titre"/>
+                            <h:inputText id="editTitle" value="#{reportBean.editTitle}" required="true" 
+                                requiredMessage="Le titre est obligatoire."/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="editCategory" value="Catégorie"/>
+                            <h:selectOneMenu id="editCategory" value="#{reportBean.editCategory}" required="true" 
+                                requiredMessage="La catégorie est obligatoire.">
+                                <f:selectItem itemLabel="Sélectionner une catégorie" noSelectionOption="true"/>
+                                <f:selectItems value="#{reportBean.categories}" var="item" 
+                                    itemValue="#{item}" itemLabel="#{item.label}"/>
+                            </h:selectOneMenu>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="editLocation" value="Lieu"/>
+                            <h:inputText id="editLocation" value="#{reportBean.editLocation}" required="true" 
+                                requiredMessage="Le lieu est obligatoire."/>
+                        </div>
+                        
+                        <div class="field">
+                            <h:outputLabel for="editDescription" value="Description"/>
+                            <h:inputTextarea id="editDescription" value="#{reportBean.editDescription}" rows="4" 
+                                required="true" requiredMessage="La description est obligatoire."/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('edit-report-modal')" 
+                        class="button button-quiet">Annuler</button>
+                    <h:commandButton value="Enregistrer les modifications" 
+                        action="#{reportBean.saveEdit}" 
+                        styleClass="button button-primary">
+                        <f:ajax execute="@form" render="@form :myReportsForm"
+                            onevent="function(data) { if (data.status === 'success') setTimeout(() => closeModal('edit-report-modal'), 100); }"/>
+                    </h:commandButton>
                 </div>
             </h:form>
         </div>
@@ -174,15 +258,15 @@
         var totalReports = #{reportBean.myReports.size()};
         
         function filterReports() {
-            var searchText = document.getElementById('searchInput').value.toLowerCase();
-            var statusFilter = document.getElementById('statusFilter').value;
+            var searchText = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            var statusFilter = document.getElementById('statusFilter')?.value || '';
             var reportRows = document.querySelectorAll('.report-row');
             var visibleCount = 0;
             
             reportRows.forEach(function(row) {
-                var title = row.getAttribute('data-report-title').toLowerCase();
-                var location = row.getAttribute('data-report-location').toLowerCase();
-                var category = row.getAttribute('data-report-category').toLowerCase();
+                var title = (row.getAttribute('data-report-title') || '').toLowerCase();
+                var location = (row.getAttribute('data-report-location') || '').toLowerCase();
+                var category = (row.getAttribute('data-report-category') || '').toLowerCase();
                 var statusClass = row.getAttribute('data-report-status-class');
                 
                 var matchesSearch = title.includes(searchText) || 
@@ -198,14 +282,13 @@
                 }
             });
             
-            // Update counter
             var resultsText = visibleCount + ' signalement(s)';
             if (searchText || statusFilter) {
                 resultsText += ' sur ' + totalReports;
             }
-            document.getElementById('resultsCount').textContent = resultsText;
+            var counter = document.getElementById('resultsCount');
+            if (counter) counter.textContent = resultsText;
             
-            // Show/hide no results message
             var noResults = document.getElementById('noResults');
             var reportList = document.getElementById('reportList');
             if (visibleCount === 0 && totalReports > 0) {
@@ -218,8 +301,10 @@
         }
         
         function showAllReports() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('statusFilter').value = '';
+            var s = document.getElementById('searchInput');
+            var f = document.getElementById('statusFilter');
+            if (s) s.value = '';
+            if (f) f.value = '';
             filterReports();
         }
     //]]>

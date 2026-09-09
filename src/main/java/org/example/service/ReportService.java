@@ -57,13 +57,13 @@ public class ReportService {
         }
     }
 
-        public synchronized Report addReport(String title, String description, String location,
-                            ReportCategory category) {
-                return addReport(title, description, location, "Etudiant demo", category);
-        }
+    public synchronized Report addReport(String title, String description, String location,
+                                         ReportCategory category) {
+        return addReport(title, description, location, "Etudiant demo", category);
+    }
 
-        public synchronized Report addReport(String title, String description, String location, String reporter,
-                                                                                 ReportCategory category) {
+    public synchronized Report addReport(String title, String description, String location, String reporter,
+                                         ReportCategory category) {
         validateReport(title, description, location, reporter, category);
         Report report = new Report(nextId++, title, description, location, reporter,
                 category, ReportStatus.SIGNALE, LocalDateTime.now());
@@ -71,26 +71,55 @@ public class ReportService {
         return report;
     }
 
-        private void validateReport(String title, String description, String location,
-                                                                String reporter, ReportCategory category) {
-                if (isBlank(title) || title.trim().length() < 5) {
-                        throw new IllegalArgumentException("Le titre doit contenir au moins 5 caractères.");
-                }
-                if (isBlank(description) || description.trim().length() < 10) {
-                        throw new IllegalArgumentException("La description doit contenir au moins 10 caractères.");
-                }
-                if (isBlank(location)) {
-                        throw new IllegalArgumentException("Le lieu est obligatoire.");
-                }
-                if (isBlank(reporter)) {
-                        throw new IllegalArgumentException("Le déclarant est obligatoire.");
-                }
-                if (category == null) {
-                        throw new IllegalArgumentException("La catégorie est obligatoire.");
-                }
+    public synchronized void updateReport(long id, String title, String description, String location,
+                                          ReportCategory category) {
+        Report report = findById(id);
+        if (report == null) {
+            throw new IllegalArgumentException("Signalement introuvable.");
         }
+        if (report.getStatus() != ReportStatus.SIGNALE) {
+            throw new IllegalArgumentException("Impossible de modifier : le signalement est deja " + report.getStatus().getLabel() + ".");
+        }
+        validateReport(title, description, location, report.getReporter(), category);
+        report.setTitle(title.trim());
+        report.setDescription(description.trim());
+        report.setLocation(location.trim());
+        report.setCategory(category);
+        report.setUpdated(true);
+        report.setUpdatedAt(LocalDateTime.now());
+    }
 
-        private boolean isBlank(String value) {
-                return value == null || value.trim().isEmpty();
+    public synchronized void deleteReport(long id) {
+        Report report = findById(id);
+        if (report == null) {
+            throw new IllegalArgumentException("Signalement introuvable.");
         }
+        if (report.getStatus() != ReportStatus.SIGNALE) {
+            throw new IllegalArgumentException("Impossible de supprimer : le signalement est deja " + report.getStatus().getLabel() + ".");
+        }
+        reports.removeIf(r -> r.getId() == id);
+    }
+
+    private void validateReport(String title, String description, String location,
+                                String reporter, ReportCategory category) {
+        if (isBlank(title) || title.trim().length() < 5) {
+            throw new IllegalArgumentException("Le titre doit contenir au moins 5 caractères.");
+        }
+        if (isBlank(description) || description.trim().length() < 10) {
+            throw new IllegalArgumentException("La description doit contenir au moins 10 caractères.");
+        }
+        if (isBlank(location)) {
+            throw new IllegalArgumentException("Le lieu est obligatoire.");
+        }
+        if (isBlank(reporter)) {
+            throw new IllegalArgumentException("Le déclarant est obligatoire.");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("La catégorie est obligatoire.");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
 }

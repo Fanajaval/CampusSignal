@@ -5,6 +5,7 @@ import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.example.model.Institution;
 import org.example.model.StudyLevel;
 import org.example.model.User;
 import org.example.model.UserRole;
@@ -26,7 +27,7 @@ public class StudentAdminBean {
     private String email;
     private String password;
     private String displayName;
-    private String institution;
+    private Institution institution;
     private String studentNumber;
     private StudyLevel studyLevel;
     
@@ -42,6 +43,10 @@ public class StudentAdminBean {
     
     public StudyLevel[] getStudyLevels() {
         return StudyLevel.values();
+    }
+    
+    public Institution[] getInstitutions() {
+        return Institution.values();
     }
     
     public String addStudent() {
@@ -158,8 +163,8 @@ public class StudentAdminBean {
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
     
-    public String getInstitution() { return institution; }
-    public void setInstitution(String institution) { this.institution = institution; }
+    public Institution getInstitution() { return institution; }
+    public void setInstitution(Institution institution) { this.institution = institution; }
     
     public String getStudentNumber() { return studentNumber; }
     public void setStudentNumber(String studentNumber) { this.studentNumber = studentNumber; }

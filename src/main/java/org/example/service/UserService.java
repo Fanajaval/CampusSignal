@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.example.model.User;
 import org.example.model.UserRole;
 import org.example.model.StudyLevel;
+import org.example.model.Institution;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,13 +48,13 @@ public class UserService {
     }
 
     public synchronized void requestStudentRegistration(String email, String password, String displayName,
-                                                        String institution, String studentNumber,
+                                                        Institution institution, String studentNumber,
                                                         StudyLevel studyLevel) {
         validateRegistration(email, password, displayName, institution, studentNumber, studyLevel);
         if (exists(email)) {
             throw new IllegalArgumentException("Cette adresse email est déjà utilisée.");
         }
-        User user = new User(normalizeEmail(email), password, displayName.trim(), institution.trim(),
+        User user = new User(normalizeEmail(email), password, displayName.trim(), institution,
             studentNumber.trim(), studyLevel, UserRole.ETUDIANT);
         pendingStudents.add(user);
     }
@@ -89,7 +90,7 @@ public class UserService {
         users.removeIf(user -> user.getEmail().equals(normalizedEmail));
     }
     
-    public synchronized void updateUser(String email, String displayName, String institution, 
+    public synchronized void updateUser(String email, String displayName, Institution institution, 
                                        String studentNumber, StudyLevel studyLevel) {
         if (email == null) {
             throw new IllegalArgumentException("L'email est obligatoire.");
@@ -104,7 +105,7 @@ public class UserService {
         if (displayName == null || displayName.trim().length() < 2) {
             throw new IllegalArgumentException("Le nom complet est obligatoire.");
         }
-        if (institution == null || institution.trim().length() < 2) {
+        if (institution == null) {
             throw new IllegalArgumentException("L'école ou la faculté est obligatoire.");
         }
         if (studentNumber == null || !studentNumber.trim().matches("^[A-Za-z0-9][A-Za-z0-9./-]{2,29}$")) {
@@ -116,7 +117,7 @@ public class UserService {
         
         // Update user
         user.setDisplayName(displayName.trim());
-        user.setInstitution(institution.trim());
+        user.setInstitution(institution);
         user.setStudentNumber(studentNumber.trim());
         user.setStudyLevel(studyLevel);
     }
@@ -143,7 +144,7 @@ public class UserService {
     }
 
     private void validateRegistration(String email, String password, String displayName,
-                                      String institution, String studentNumber, StudyLevel studyLevel) {
+                                      Institution institution, String studentNumber, StudyLevel studyLevel) {
         if (email == null || !email.trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
             throw new IllegalArgumentException("L'adresse email est invalide.");
         }
@@ -153,7 +154,7 @@ public class UserService {
         if (displayName == null || displayName.trim().length() < 2) {
             throw new IllegalArgumentException("Le nom complet est obligatoire.");
         }
-        if (institution == null || institution.trim().length() < 2) {
+        if (institution == null) {
             throw new IllegalArgumentException("L'école ou la faculté est obligatoire.");
         }
         if (studentNumber == null || !studentNumber.trim().matches("^[A-Za-z0-9][A-Za-z0-9./-]{2,29}$")) {

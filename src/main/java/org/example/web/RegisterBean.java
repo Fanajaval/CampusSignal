@@ -5,8 +5,8 @@ import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.example.model.User;
 import org.example.model.StudyLevel;
+import org.example.model.Institution;
 import org.example.service.UserService;
 
 @Named("registerBean")
@@ -17,7 +17,7 @@ public class RegisterBean {
     private String email;
     private String password;
     private String displayName;
-    private String institution;
+    private Institution institution;
     private String studentNumber;
     private StudyLevel studyLevel;
 
@@ -43,15 +43,22 @@ public class RegisterBean {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
-    public String getInstitution() { return institution; }
-    public void setInstitution(String institution) { this.institution = institution; }
+    
+    public Institution getInstitution() { return institution; }
+    public void setInstitution(Institution institution) { this.institution = institution; }
+    
     public String getStudentNumber() { return studentNumber; }
     public void setStudentNumber(String studentNumber) { this.studentNumber = studentNumber; }
-    public StudyLevel[] getStudyLevels() { return StudyLevel.values(); }
+    
     public StudyLevel getStudyLevel() { return studyLevel; }
     public void setStudyLevel(StudyLevel studyLevel) { this.studyLevel = studyLevel; }
+    
+    public StudyLevel[] getStudyLevels() { return StudyLevel.values(); }
+    public Institution[] getInstitutions() { return Institution.values(); }
 }
